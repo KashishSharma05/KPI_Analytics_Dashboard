@@ -16,3 +16,6 @@ __pycache__/
 # personal planning notes, kept local
 ROADMAP.md
 STEPS.md
+
+# exported CSVs are rebuilt by the pipeline
+data/exports/*.csv
