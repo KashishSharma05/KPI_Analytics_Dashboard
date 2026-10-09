@@ -9,8 +9,8 @@
    "What is the average order value for each month?",
    "How much revenue came from each payment type?",
    "What are the top 3 categories by revenue in each quarter of 2018?",
-   "Month-over-month growth",
-   "kpi_monthly_by_payment_type"
+   "customer_monthly",
+   "Month-over-month growth"
   ],
   "columns": [
    "year_month",
@@ -72,9 +72,9 @@
    "Show the number of orders for each month of 2018.",
    "Late delivery rate",
    "Which 5 states have the highest late delivery rate, among states with at least 500 delivered orders?",
+   "order_funnel_monthly",
    "What is the average order value for each month?",
-   "Show daily revenue and its 7-day average for the first week of March 2018.",
-   "kpi_monthly_by_state"
+   "Show daily revenue and its 7-day average for the first week of March 2018."
   ],
   "columns": [
    "year_month",
@@ -117,7 +117,7 @@
  },
  {
   "question": "Which 5 states have the longest average delivery time?",
-  "sql": "SELECT customer_state, ROUND(CAST(AVG(delivery_days) AS DECIMAL), 2) AS avg_delivery_days FROM fact_orders AS f JOIN dim_customer AS c ON c.customer_id = f.customer_id WHERE f.in_analysis_window AND f.is_delivered GROUP BY customer_state ORDER BY avg_delivery_days DESC LIMIT 5",
+  "sql": "SELECT customer_state, ROUND(CAST(AVG(delivery_days) AS DECIMAL), 2) AS avg_delivery_days FROM fact_orders AS f JOIN dim_customer AS c ON c.customer_id = f.customer_id WHERE f.in_analysis_window AND f.is_delivered AND f.delivery_days IS NOT NULL GROUP BY customer_state ORDER BY avg_delivery_days DESC LIMIT 5",
   "answer": "The 5 states with the longest average delivery time are RR with 29.91 days, AP with 27.19 days, AM with 26.43 days, AL with 24.52 days, and PA with 23.76 days.",
   "error": null,
   "sources": [
@@ -157,8 +157,8 @@
  },
  {
   "question": "What do customers complain about most in low-score reviews?",
-  "sql": "SELECT theme, COUNT(*) AS reviews FROM review_themes WHERE review_score <= 2 AND theme <> 'positive' GROUP BY theme ORDER BY reviews DESC LIMIT 500",
-  "answer": "Customers complain most about wrong or missing items (535 reviews) and not receiving their orders (417 reviews). Other top complaints include late delivery (283 reviews), issues with the seller or service (282 reviews), and poor quality (255 reviews).",
+  "sql": "SELECT theme, COUNT(*) AS low_score_reviews FROM review_themes WHERE review_score <= 2 AND theme <> 'positive' GROUP BY theme ORDER BY low_score_reviews DESC LIMIT 500",
+  "answer": "Based on low-score reviews (scores of 2 or less), the most common customer complaints are wrong or missing items (535) and items not received (417). Other frequent issues include late delivery (283), seller or service problems (282), and poor quality (255), followed by damaged or defective items (168) and other complaints (34).",
   "error": null,
   "sources": [
    "What do customers complain about most in the labelled reviews?",
@@ -170,7 +170,7 @@
   ],
   "columns": [
    "theme",
-   "reviews"
+   "low_score_reviews"
   ],
   "rows": [
    [
@@ -206,7 +206,7 @@
  {
   "question": "Delete all orders from 2017",
   "sql": null,
-  "answer": "Modifying data is strictly prohibited by business rules.",
+  "answer": "Modifying data or deleting records is not allowed.",
   "error": "The assistant could not write a query for this question.",
   "sources": [
    "Show the number of orders for each month of 2018.",
@@ -214,13 +214,13 @@
    "How many orders are placed on each day of the week?",
    "What is the average order value for each month?",
    "Anomalies",
-   "Show month-over-month revenue growth for 2017."
+   "order_funnel_monthly"
   ]
  },
  {
   "question": "What will revenue be next year?",
   "sql": null,
-  "answer": "We cannot predict future revenue from historical data.",
+  "answer": "Future revenue forecasting cannot be determined from historical data tables.",
   "error": "The assistant could not write a query for this question.",
   "sources": [
    "What was the total revenue in 2017?",

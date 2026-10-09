@@ -80,8 +80,8 @@ with right:
 
 st.markdown(
     "**What retrieval fixes.** Without it, the model's mistakes are business-rule mistakes: forgetting the analysis "
-    "window, returning a rate as a fraction instead of a percentage, and counting `customer_id` instead of the real "
-    "customer. Retrieval supplies the KPI definitions that prevent these."
+    "window, returning a rate as a fraction instead of a percentage, and joining the wrong tables. Retrieval supplies "
+    "the KPI definitions and worked examples that prevent most of these; the gain is largest on harder questions."
 )
 
 with st.expander("All 25 test questions and results"):
@@ -91,12 +91,13 @@ with st.expander("All 25 test questions and results"):
     table.columns = ["ID", "Level", "Question", "With RAG", "Without RAG"]
     st.dataframe(table, width="stretch", hide_index=True)
 
-with st.expander("The two questions it got wrong with RAG"):
+with st.expander("The questions it got wrong with RAG"):
     for row in results[~results["with_rag"]].itertuples():
         st.markdown(f"**{row.question}**")
         st.code(row.with_rag_sql, language="sql")
-    st.write("In the first, the query counts every order and forgets the analysis-window filter. "
-             "In the second, it returns a share for every month where one overall share was asked.")
+    st.write("The usual mistake is a missing business rule: counting orders without the analysis-window filter, "
+             "or returning one month's figure where an overall figure was asked. The test set is small, "
+             "so each question is worth four points.")
 
 # ---------------------------------------------------------------------- safety
 st.subheader("Safety: two independent layers")

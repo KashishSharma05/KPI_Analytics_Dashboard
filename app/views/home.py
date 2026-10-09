@@ -61,10 +61,12 @@ links = [
     ("views/sales.py", "Sales by category, state and payment", "🛒"),
     ("views/anomalies.py", "Anomalies and what drove them", "🚨"),
     ("views/overview.py", "Daily trends and anomalies", "📈"),
+    ("views/business_case.py", "Business case: funnel and recommendations", "💼"),
+    ("views/growth.py", "Growth and retention", "🌱"),
     ("views/built_data.py", "The data model and the SQL behind it", "🗄️"),
     ("views/built_ai.py", "The AI assistant and how it was tested", "🤖"),
 ]
-for column, (page, label, icon) in zip(st.columns(3) + st.columns(3), links):
+for column, (page, label, icon) in zip(st.columns(4) + st.columns(4), links):
     column.page_link(page, label=label, icon=icon)
 
 st.divider()

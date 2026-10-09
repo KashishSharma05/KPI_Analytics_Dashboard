@@ -27,11 +27,13 @@ apply_style()
 pages = {
     "Project": [
         st.Page("views/home.py", title="Home", icon="🏠", default=True),
+        st.Page("views/business_case.py", title="Business case", icon="💼"),
     ],
     "Dashboard": [
         st.Page("views/executive.py", title="Executive report", icon="📊"),
         st.Page("views/overview.py", title="Trends & anomalies", icon="📈"),
         st.Page("views/sales.py", title="Sales drill-down", icon="🛒"),
+        st.Page("views/growth.py", title="Growth & retention", icon="🌱"),
         st.Page("views/anomalies.py", title="Anomalies & root cause", icon="🚨"),
         st.Page("views/customers.py", title="Delivery & customer voice", icon="🚚"),
     ],

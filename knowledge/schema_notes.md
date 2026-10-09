@@ -50,3 +50,15 @@ Top 5 drivers per anomaly and dimension. Columns: anomaly_date, kpi, dimension, 
 
 ## review_themes
 Sample of LLM-labelled reviews. Columns: order_id, order_date, review_score, theme, sentiment, english_summary, is_late, delivery_days, customer_state.
+
+## order_funnel_monthly
+One row per month: how many orders reached each stage of the journey. Columns: month_start, placed, approved, shipped, delivered, delivered_on_time, on_time_and_happy (on time and rated 4 or 5 stars). Each stage is a subset of the one before it. Use it for funnel or drop-off questions.
+
+## customer_summary
+One row per real customer (customer_unique_id), delivered orders in the analysis window only. Columns: customer_unique_id, first_order_date, first_order_month, second_order_date (NULL if they never bought again), delivered_orders, revenue, first_state, first_category (main category of the first order). A repeat customer has delivered_orders >= 2.
+
+## customer_monthly
+One row per month: active_customers, new_customers (first delivered order in that month), returning_customers, revenue_new, revenue_returning. Use it for new versus returning customer questions.
+
+## repeat_by_first_category
+One row per first-purchase category with at least 500 customers. Columns: first_category, customers, repeat_customers, repeat_rate_pct, revenue_per_customer.

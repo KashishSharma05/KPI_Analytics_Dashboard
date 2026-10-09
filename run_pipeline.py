@@ -6,7 +6,7 @@ Steps, in order:
   1. load CSV files into the raw schema
   2. build the clean schema
   3. build the star schema (mart)
-  4. create the KPI views and cohort retention
+  4. create the KPI views, cohort retention, and the growth and funnel views
   5. detect anomalies
   6. find the drivers of each anomaly
   7. rebuild the review themes table from the saved LLM labels
@@ -48,6 +48,7 @@ def main():
     step("4. KPI views and cohort retention")
     run_sql_file("sql/04_kpi_views.sql")
     run_sql_file("sql/05_cohort_retention.sql")
+    run_sql_file("sql/08_growth.sql")
 
     step("5. Detect anomalies")
     detect_anomalies.main()

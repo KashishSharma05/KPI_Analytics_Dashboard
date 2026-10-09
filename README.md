@@ -18,7 +18,8 @@ An end-to-end analytics project on 100K real e-commerce orders: a SQL data model
 | Anomalies | Rolling z-score, IQR and Isolation Forest on daily KPIs | `src/detect_anomalies.py` |
 | Root cause | For each major anomaly, which categories, states and payment types drove it | `sql/06_root_cause.sql` |
 | Review intelligence | An LLM sorts Portuguese review comments into complaint themes | `src/ai/review_themes.py` |
-| Website and dashboard | Project home page, five dashboard pages, and two pages on how it was built | `app/dashboard.py`, `app/views/` |
+| Growth and funnel | Order journey funnel, new vs returning customers, repeat rate by first purchase | `sql/08_growth.sql` |
+| Website and dashboard | Home and business case, six dashboard pages, and two pages on how it was built | `app/dashboard.py`, `app/views/` |
 | Ask-Your-Data | English question → SQL → answer and chart, with RAG and safety checks | `src/ai/`, `app/ask_your_data.py` |
 | Reporting | Weekly summary email with KPIs, anomalies and an AI-written summary | `src/report.py` |
 
@@ -74,7 +75,9 @@ Monthly revenue is cross-checked against an independent Pandas calculation from 
 3. **A delivery crisis in February–March 2018.** For orders placed between 19 Feb and 18 Mar, the weekly late rate reached 19–26% (normal: about 5%) and the average review score fell to 3.5.
 4. **Black Friday 2017 was a broad spike, not one segment.** 1,176 orders against an expected 170 (+591%). Credit-card orders made 81% of the extra revenue and São Paulo 32%, but the top category accounted for only 13%.
 5. **Revenue is concentrated.** 7 of 74 categories bring half the revenue; three states (SP, RJ, MG) bring 63%.
-6. **Almost nobody buys twice.** Only 3% of customers placed a second order, so growth depends on new customers.
+6. **Almost nobody buys twice, and it matters.** Only 3% of customers placed a second order (2.1% if same-day second orders are left out), yet a repeat customer is worth 1.9x a one-time customer. 98% of revenue comes from new customers.
+7. **What customers buy first predicts whether they return.** 8.7% of customers whose first order was home appliances bought again, against 1.6% for electronics.
+8. **Three in four orders end well.** Of 99,092 orders placed, 97% are delivered, 90% on time, and 74% are on time with a 4-5 star review.
 
 ---
 
@@ -84,8 +87,8 @@ One Streamlit app (`app/dashboard.py`) presents the whole project.
 
 | Section | Pages |
 |---|---|
-| Project | Home: what was built, headline numbers, the main findings |
-| Dashboard | Executive report (one-page BI-style summary with slicers) · Trends and anomalies · Sales drill-down · Anomalies and root cause · Delivery and customer voice |
+| Project | Home: what was built, headline numbers, the main findings · Business case: customer-journey funnel, recommendations with owners and measures, sizing of what is at stake |
+| Dashboard | Executive report (one-page BI-style summary with slicers) · Trends and anomalies · Sales drill-down · Growth and retention · Anomalies and root cause · Delivery and customer voice |
 | How it was built | Data model and SQL (cleaning rules, star schema, featured queries with results) · AI assistant (flow, recorded examples, accuracy, safety tests) |
 
 The dashboard pages share a period filter and a state filter. Their data files hold counts and sums rather than ready-made averages, so every KPI is recalculated exactly for whatever is selected; the totals match the SQL views.
@@ -130,14 +133,16 @@ Measured as execution accuracy on 25 test questions with hand-written correct qu
 
 | Difficulty | With RAG | Without RAG |
 |---|---|---|
-| Easy (10) | 9 | 8 |
+| Easy (10) | 8 | 8 |
 | Medium (10) | 9 | 6 |
-| Hard (5) | 5 | 3 |
-| **Total (25)** | **23 (92%)** | **17 (68%)** |
+| Hard (5) | 5 | 4 |
+| **Total (25)** | **22 (88%)** | **18 (72%)** |
 
-Without retrieval the model sees only table and column names. Its typical mistakes are business-rule mistakes: forgetting the analysis window, returning a rate as a fraction instead of a percentage, and counting `customer_id` instead of the real customer. Retrieval fixes these by supplying the KPI definitions.
+Without retrieval the model sees only table and column names. Its typical mistakes are business-rule mistakes: forgetting the analysis window, returning a rate as a fraction instead of a percentage, and joining the wrong tables for category revenue. Retrieval fixes most of these by supplying the KPI definitions and worked examples; the gain is largest on medium and hard questions.
 
-The two failures with RAG: one query counted all orders without the analysis-window filter, and one returned a monthly share where an overall share was asked.
+The three failures with RAG: two queries counted orders without the analysis-window filter, and one returned a single month's revenue share where an overall share was asked.
+
+The test set is small, so one question is worth four points; an earlier run, before four tables were added to the schema, scored 23 and 17. The numbers above are from the current schema.
 
 Model: `gemini-3.5-flash-lite` (chosen for its free-tier limits), embeddings `gemini-embedding-001`.
 
@@ -212,7 +217,7 @@ With the database and the API key in `.env`, the dashboard shows a fifth page, "
 
 ```
 ├── run_pipeline.py          one command for the whole pipeline
-├── sql/                     schema, cleaning, star schema, KPI views, cohort, root cause, read-only role
+├── sql/                     schema, cleaning, star schema, KPI views, cohort, root cause, growth and funnel, read-only role
 ├── src/
 │   ├── load.py, validate.py, crosscheck.py, detect_anomalies.py, export.py, report.py
 │   └── ai/                  llm.py, review_themes.py, knowledge_base.py, sql_guard.py, text_to_sql.py, evaluate.py

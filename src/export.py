@@ -112,6 +112,51 @@ APP_EXPORTS = {
         WHERE f.in_analysis_window
         GROUP BY 1, 2, 3
         ORDER BY 1, 2, 3""",
+    # customer journey: how many orders reach each stage, per month
+    "funnel_monthly": "SELECT * FROM mart.order_funnel_monthly ORDER BY month_start",
+    # new vs returning customers and their revenue, per month
+    "customer_monthly": "SELECT * FROM mart.customer_monthly ORDER BY month_start",
+    "repeat_by_first_category": "SELECT * FROM mart.repeat_by_first_category ORDER BY repeat_rate_pct DESC",
+    # customers and revenue by how many orders they placed
+    "customer_value": """
+        SELECT
+            CASE WHEN delivered_orders = 1 THEN '1 order'
+                 WHEN delivered_orders = 2 THEN '2 orders'
+                 ELSE '3 or more orders' END AS orders_placed,
+            COUNT(*)               AS customers,
+            SUM(revenue)           AS revenue,
+            ROUND(AVG(revenue), 2) AS revenue_per_customer
+        FROM mart.customer_summary
+        GROUP BY 1
+        ORDER BY 1""",
+    # how long repeat customers waited before their second order
+    "second_order_gap": """
+        WITH gaps AS (
+            SELECT second_order_date - first_order_date AS days
+            FROM mart.customer_summary
+            WHERE second_order_date IS NOT NULL
+        )
+        SELECT
+            CASE WHEN days = 0    THEN '1. Same day'
+                 WHEN days <= 30  THEN '2. 1-30 days'
+                 WHEN days <= 90  THEN '3. 31-90 days'
+                 WHEN days <= 180 THEN '4. 91-180 days'
+                 ELSE '5. Over 180 days' END AS gap,
+            COUNT(*) AS customers
+        FROM gaps
+        GROUP BY 1
+        ORDER BY 1""",
+    # counts used to size the business impact of late delivery and cancellations
+    "impact_inputs": """
+        SELECT
+            COUNT(*) FILTER (WHERE is_delivered AND is_late AND review_score IS NOT NULL)          AS late_reviewed,
+            COUNT(*) FILTER (WHERE is_delivered AND is_late AND review_score <= 2)                 AS late_low_reviews,
+            COUNT(*) FILTER (WHERE is_delivered AND is_late = FALSE AND review_score IS NOT NULL)  AS on_time_reviewed,
+            COUNT(*) FILTER (WHERE is_delivered AND is_late = FALSE AND review_score <= 2)         AS on_time_low_reviews,
+            COUNT(*) FILTER (WHERE is_canceled)                                                    AS canceled_orders,
+            COALESCE(SUM(order_revenue) FILTER (WHERE is_canceled), 0)                             AS canceled_order_value
+        FROM mart.fact_orders
+        WHERE in_analysis_window""",
     "anomalies": "SELECT * FROM mart.anomalies ORDER BY anomaly_date, kpi",
     "anomaly_drivers": "SELECT * FROM mart.anomaly_drivers ORDER BY anomaly_date, kpi, dimension, driver_rank",
     "cohort_retention": "SELECT * FROM mart.cohort_retention ORDER BY cohort_month, months_since_first",
