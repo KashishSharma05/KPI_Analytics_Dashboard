@@ -1,0 +1,66 @@
+[
+  {
+    "question": "What was the total revenue in 2017?",
+    "sql": "SELECT SUM(order_revenue) AS revenue FROM fact_orders WHERE is_delivered AND in_analysis_window AND order_date >= '2017-01-01' AND order_date < '2018-01-01'"
+  },
+  {
+    "question": "Show the number of orders for each month of 2018.",
+    "sql": "SELECT year_month, orders FROM kpi_monthly WHERE year_month LIKE '2018-%' ORDER BY year_month"
+  },
+  {
+    "question": "Which 5 states placed the most orders?",
+    "sql": "SELECT c.customer_state, COUNT(*) AS orders FROM fact_orders AS f JOIN dim_customer AS c ON c.customer_id = f.customer_id WHERE f.in_analysis_window GROUP BY c.customer_state ORDER BY orders DESC LIMIT 5"
+  },
+  {
+    "question": "What is the average order value for each month?",
+    "sql": "SELECT year_month, aov FROM kpi_monthly ORDER BY year_month"
+  },
+  {
+    "question": "Which 5 states have the highest late delivery rate, among states with at least 500 delivered orders?",
+    "sql": "SELECT c.customer_state, ROUND(100.0 * COUNT(*) FILTER (WHERE f.is_late) / COUNT(f.is_late), 2) AS late_delivery_rate FROM fact_orders AS f JOIN dim_customer AS c ON c.customer_id = f.customer_id WHERE f.in_analysis_window AND f.is_delivered GROUP BY c.customer_state HAVING COUNT(*) >= 500 ORDER BY late_delivery_rate DESC LIMIT 5"
+  },
+  {
+    "question": "How much revenue came from each payment type?",
+    "sql": "SELECT main_payment_type, SUM(order_revenue) AS revenue FROM fact_orders WHERE is_delivered AND in_analysis_window GROUP BY main_payment_type ORDER BY revenue DESC"
+  },
+  {
+    "question": "Show month-over-month revenue growth for 2017.",
+    "sql": "SELECT year_month, revenue, revenue_mom_growth_pct FROM kpi_monthly WHERE year_month LIKE '2017-%' ORDER BY year_month"
+  },
+  {
+    "question": "What are the top 3 categories by revenue in each quarter of 2018?",
+    "sql": "WITH quarterly AS (SELECT d.quarter, p.category, SUM(i.item_total) AS revenue FROM fact_order_items AS i JOIN dim_product AS p ON p.product_id = i.product_id JOIN dim_date AS d ON d.date_key = i.order_date WHERE i.is_delivered AND i.in_analysis_window AND d.year = 2018 GROUP BY d.quarter, p.category), ranked AS (SELECT quarter, category, revenue, RANK() OVER (PARTITION BY quarter ORDER BY revenue DESC) AS revenue_rank FROM quarterly) SELECT quarter, category, revenue, revenue_rank FROM ranked WHERE revenue_rank <= 3 ORDER BY quarter, revenue_rank"
+  },
+  {
+    "question": "Do late orders get lower review scores than on-time orders?",
+    "sql": "SELECT is_late, ROUND(AVG(review_score), 2) AS avg_review_score, COUNT(*) AS orders FROM fact_orders WHERE in_analysis_window AND is_delivered AND is_late IS NOT NULL AND review_score IS NOT NULL GROUP BY is_late"
+  },
+  {
+    "question": "How many anomalies were found for each KPI?",
+    "sql": "SELECT kpi, COUNT(*) AS anomalies FROM anomalies GROUP BY kpi ORDER BY anomalies DESC"
+  },
+  {
+    "question": "Which categories drove the revenue anomaly on 2017-11-20?",
+    "sql": "SELECT segment AS category, actual, baseline, change, contribution_pct FROM anomaly_drivers WHERE anomaly_date = '2017-11-20' AND kpi = 'revenue' AND dimension = 'category' ORDER BY driver_rank"
+  },
+  {
+    "question": "What do customers complain about most in the labelled reviews?",
+    "sql": "SELECT theme, COUNT(*) AS reviews FROM review_themes WHERE theme <> 'positive' GROUP BY theme ORDER BY reviews DESC"
+  },
+  {
+    "question": "Who are the top 5 sellers by revenue?",
+    "sql": "SELECT i.seller_id, s.seller_state, SUM(i.item_total) AS revenue FROM fact_order_items AS i JOIN dim_seller AS s ON s.seller_id = i.seller_id WHERE i.is_delivered AND i.in_analysis_window GROUP BY i.seller_id, s.seller_state ORDER BY revenue DESC LIMIT 5"
+  },
+  {
+    "question": "How many orders are placed on each day of the week?",
+    "sql": "SELECT d.day_name, COUNT(*) AS orders FROM fact_orders AS f JOIN dim_date AS d ON d.date_key = f.order_date WHERE f.in_analysis_window GROUP BY d.day_of_week, d.day_name ORDER BY d.day_of_week"
+  },
+  {
+    "question": "What percentage of customers bought more than once?",
+    "sql": "SELECT repeat_customer_pct FROM repeat_customer_summary"
+  },
+  {
+    "question": "Show daily revenue and its 7-day average for the first week of March 2018.",
+    "sql": "SELECT date_key, revenue, revenue_7d_avg FROM kpi_daily WHERE date_key BETWEEN '2018-03-01' AND '2018-03-07' ORDER BY date_key"
+  }
+]

@@ -25,3 +25,9 @@ GRANT SELECT ON ALL TABLES IN SCHEMA mart TO analyst_readonly;
 
 -- Any query from this user is stopped after 10 seconds.
 ALTER ROLE analyst_readonly SET statement_timeout = '10s';
+
+-- Table names without a schema are looked up in mart only.
+ALTER ROLE analyst_readonly SET search_path = mart;
+
+-- Tables added to mart later (anomalies, review_themes) are readable too.
+ALTER DEFAULT PRIVILEGES IN SCHEMA mart GRANT SELECT ON TABLES TO analyst_readonly;
