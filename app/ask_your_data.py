@@ -1,6 +1,4 @@
-"""Ask-Your-Data: chat page for the AI assistant.
-
-Run with:  streamlit run app/ask_your_data.py
+"""Ask-Your-Data: chat page for the AI assistant (a page of app/dashboard.py).
 
 Type a business question. The page shows the answer in words, a chart
 when the result suits one, the result table, and the SQL that was run
@@ -26,7 +24,6 @@ EXAMPLE_QUESTIONS = [
     "What do customers complain about most in low-score reviews?",
 ]
 
-st.set_page_config(page_title="Ask Your Data", page_icon="📊", layout="centered")
 st.title("Ask Your Data")
 st.caption("Olist e-commerce KPIs, January 2017 to August 2018. Ask in plain English.")
 
@@ -58,7 +55,7 @@ def show_result(result):
             st.code(result["sql"], language="sql")
         return
 
-    st.write(result["answer"])
+    st.write(result["answer"].replace("$", "\\$"))  # a bare $ would start a maths formula in Markdown
     show_chart(result["rows"])
     with st.expander(f"Result table ({len(result['rows'])} rows)"):
         st.dataframe(result["rows"], hide_index=True)
@@ -74,7 +71,7 @@ if "history" not in st.session_state:
 with st.sidebar:
     st.subheader("Try a question")
     for example in EXAMPLE_QUESTIONS:
-        if st.button(example, use_container_width=True):
+        if st.button(example, width="stretch"):
             st.session_state.pending_question = example
     st.divider()
     st.caption(

@@ -1,0 +1,97 @@
+[
+ {
+  "sql": "DROP TABLE mart.fact_orders",
+  "expected": "blocked",
+  "outcome": "blocked: Only SELECT statements are allowed."
+ },
+ {
+  "sql": "DELETE FROM fact_orders",
+  "expected": "blocked",
+  "outcome": "blocked: Only SELECT statements are allowed."
+ },
+ {
+  "sql": "UPDATE fact_orders SET order_revenue = 0",
+  "expected": "blocked",
+  "outcome": "blocked: Only SELECT statements are allowed."
+ },
+ {
+  "sql": "INSERT INTO fact_orders (order_id) VALUES ('x')",
+  "expected": "blocked",
+  "outcome": "blocked: Only SELECT statements are allowed."
+ },
+ {
+  "sql": "SELECT 1; DROP TABLE fact_orders",
+  "expected": "blocked",
+  "outcome": "blocked: Only one SQL statement is allowed."
+ },
+ {
+  "sql": "TRUNCATE fact_orders",
+  "expected": "blocked",
+  "outcome": "blocked: Only SELECT statements are allowed."
+ },
+ {
+  "sql": "CREATE TABLE mart.copy AS SELECT * FROM fact_orders",
+  "expected": "blocked",
+  "outcome": "blocked: Only SELECT statements are allowed."
+ },
+ {
+  "sql": "SELECT * INTO backup FROM fact_orders",
+  "expected": "blocked",
+  "outcome": "blocked: Not allowed in a query: INTO"
+ },
+ {
+  "sql": "SELECT * FROM clean.orders",
+  "expected": "blocked",
+  "outcome": "blocked: Schema not allowed: clean"
+ },
+ {
+  "sql": "SELECT * FROM raw.customers",
+  "expected": "blocked",
+  "outcome": "blocked: Schema not allowed: raw"
+ },
+ {
+  "sql": "SELECT * FROM pg_catalog.pg_user",
+  "expected": "blocked",
+  "outcome": "blocked: Schema not allowed: pg_catalog"
+ },
+ {
+  "sql": "SELECT * FROM information_schema.tables",
+  "expected": "blocked",
+  "outcome": "blocked: Schema not allowed: information_schema"
+ },
+ {
+  "sql": "SELECT pg_sleep(60)",
+  "expected": "blocked",
+  "outcome": "blocked: Function not allowed: pg_sleep"
+ },
+ {
+  "sql": "SELECT pg_read_file('/etc/passwd')",
+  "expected": "blocked",
+  "outcome": "blocked: Function not allowed: pg_read_file"
+ },
+ {
+  "sql": "WITH d AS (DELETE FROM fact_orders RETURNING *) SELECT * FROM d",
+  "expected": "blocked",
+  "outcome": "blocked: Not allowed in a query: DELETE"
+ },
+ {
+  "sql": "GRANT ALL ON fact_orders TO analyst_readonly",
+  "expected": "blocked",
+  "outcome": "blocked: Only SELECT statements are allowed."
+ },
+ {
+  "sql": "SELECT COUNT(*) FROM fact_orders",
+  "expected": "allowed",
+  "outcome": "allowed"
+ },
+ {
+  "sql": "SELECT year_month, revenue FROM mart.kpi_monthly ORDER BY 1",
+  "expected": "allowed",
+  "outcome": "allowed"
+ },
+ {
+  "sql": "WITH t AS (SELECT category FROM dim_product) SELECT COUNT(*) FROM t",
+  "expected": "allowed",
+  "outcome": "allowed"
+ }
+]

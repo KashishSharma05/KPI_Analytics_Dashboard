@@ -1,8 +1,8 @@
 # AI-Powered Business KPI Analytics & Anomaly Monitoring Dashboard
 
-An end-to-end analytics project on 100K real e-commerce orders: a SQL data model and KPI layer, statistical anomaly detection with root-cause analysis, a Power BI dashboard, and an AI assistant that answers business questions in plain English by writing and safely running SQL.
+An end-to-end analytics project on 100K real e-commerce orders: a SQL data model and KPI layer, statistical anomaly detection with root-cause analysis, an interactive dashboard, and an AI assistant that answers business questions in plain English by writing and safely running SQL.
 
-**Stack:** PostgreSQL · SQL · Python (Pandas, SciPy, scikit-learn) · Power BI · Google Gemini · FAISS · Streamlit
+**Stack:** PostgreSQL · SQL · Python (Pandas, SciPy, scikit-learn) · Streamlit · Plotly · Google Gemini · FAISS
 
 ---
 
@@ -18,6 +18,7 @@ An end-to-end analytics project on 100K real e-commerce orders: a SQL data model
 | Anomalies | Rolling z-score, IQR and Isolation Forest on daily KPIs | `src/detect_anomalies.py` |
 | Root cause | For each major anomaly, which categories, states and payment types drove it | `sql/06_root_cause.sql` |
 | Review intelligence | An LLM sorts Portuguese review comments into complaint themes | `src/ai/review_themes.py` |
+| Website and dashboard | Project home page, four dashboard pages, and two pages on how it was built | `app/dashboard.py`, `app/views/` |
 | Ask-Your-Data | English question → SQL → answer and chart, with RAG and safety checks | `src/ai/`, `app/ask_your_data.py` |
 | Reporting | Weekly summary email with KPIs, anomalies and an AI-written summary | `src/report.py` |
 
@@ -30,7 +31,7 @@ flowchart TD
     E --> F[Anomaly detection]
     F --> G[Root cause drivers]
     C --> H[LLM review themes]
-    E --> I[Power BI dashboard]
+    E --> I[Interactive dashboard]
     G --> I
     H --> I
     E --> J[Ask-Your-Data assistant]
@@ -74,6 +75,22 @@ Monthly revenue is cross-checked against an independent Pandas calculation from 
 4. **Black Friday 2017 was a broad spike, not one segment.** 1,176 orders against an expected 170 (+591%). Credit-card orders made 81% of the extra revenue and São Paulo 32%, but the top category accounted for only 13%.
 5. **Revenue is concentrated.** 7 of 74 categories bring half the revenue; three states (SP, RJ, MG) bring 63%.
 6. **Almost nobody buys twice.** Only 3% of customers placed a second order, so growth depends on new customers.
+
+---
+
+## Project website and dashboard
+
+One Streamlit app (`app/dashboard.py`) presents the whole project.
+
+| Section | Pages |
+|---|---|
+| Project | Home: what was built, headline numbers, the main findings |
+| Dashboard | Overview · Sales drill-down · Anomalies and root cause · Delivery and customer voice |
+| How it was built | Data model and SQL (cleaning rules, star schema, featured queries with results) · AI assistant (flow, recorded examples, accuracy, safety tests) |
+
+The dashboard pages share a period filter and a state filter. Their data files hold counts and sums rather than ready-made averages, so every KPI is recalculated exactly for whatever is selected; the totals match the SQL views.
+
+The site reads small files in `app/data/`, so it runs without the database. With the database and an API key configured it adds a live "Ask your data" chat page.
 
 ---
 
@@ -173,7 +190,10 @@ Download the dataset from Kaggle and put the CSV files in `data/raw/`. Then:
 python run_pipeline.py              # load → clean → model → KPIs → anomalies → export → report
 python -m src.validate              # data quality report
 python -m src.crosscheck            # SQL vs Pandas revenue check
+streamlit run app/dashboard.py      # the project website and dashboard
 ```
+
+The dashboard reads small summary files in `app/data/` that are kept in the repository, so it also runs without the database: `pip install -r requirements.txt` and `streamlit run app/dashboard.py` is enough to see it.
 
 AI features (need `GEMINI_API_KEY`):
 
@@ -182,8 +202,9 @@ python -m src.ai.knowledge_base     # build the FAISS index
 python -m src.ai.review_themes      # label the review sample
 python -m src.ai.sql_guard          # safety self-test
 python -m src.ai.evaluate sql       # accuracy test
-streamlit run app/ask_your_data.py  # chat page
 ```
+
+With the database and the API key in `.env`, the dashboard shows a fifth page, "Ask your data".
 
 ---
 
@@ -198,6 +219,10 @@ streamlit run app/ask_your_data.py  # chat page
 ├── knowledge/               KPI glossary, table notes, example queries (the RAG knowledge base)
 ├── eval/                    test questions and results
 ├── notebooks/eda.ipynb      exploratory analysis and hypothesis test
-├── app/ask_your_data.py     Streamlit chat page
-└── data/                    raw CSVs and Power BI exports (not in git)
+├── app/
+│   ├── dashboard.py         website entry point
+│   ├── views/               home, dashboard and how-it-was-built pages
+│   ├── ask_your_data.py     chat page for the AI assistant
+│   └── data/                small summary tables the dashboard reads
+└── data/                    raw CSVs and full exports (not in git)
 ```

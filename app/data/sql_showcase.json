@@ -1,0 +1,426 @@
+[
+ {
+  "title": "Month-over-month revenue growth",
+  "skills": "CTE, LAG window function, NULLIF",
+  "question": "How fast is revenue growing from one month to the next?",
+  "sql": "WITH monthly AS (\n    SELECT\n        DATE_TRUNC('month', order_date)::date AS month_start,\n        SUM(order_revenue)                    AS revenue\n    FROM mart.fact_orders\n    WHERE is_delivered AND in_analysis_window\n    GROUP BY 1\n)\nSELECT\n    TO_CHAR(month_start, 'YYYY-MM')              AS month,\n    revenue,\n    LAG(revenue) OVER (ORDER BY month_start)     AS previous_month,\n    ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY month_start))\n          / NULLIF(LAG(revenue) OVER (ORDER BY month_start), 0), 1) AS growth_pct\nFROM monthly\nORDER BY month_start",
+  "total_rows": 20,
+  "columns": [
+   "month",
+   "revenue",
+   "previous_month",
+   "growth_pct"
+  ],
+  "rows": [
+   [
+    "2017-01",
+    127482.37,
+    NaN,
+    NaN
+   ],
+   [
+    "2017-02",
+    271239.32,
+    "127482.37",
+    "112.8"
+   ],
+   [
+    "2017-03",
+    414330.95,
+    "271239.32",
+    "52.8"
+   ],
+   [
+    "2017-04",
+    390812.4,
+    "414330.95",
+    "-5.7"
+   ],
+   [
+    "2017-05",
+    566851.4,
+    "390812.4",
+    "45.0"
+   ],
+   [
+    "2017-06",
+    490050.37,
+    "566851.4",
+    "-13.5"
+   ],
+   [
+    "2017-07",
+    566299.08,
+    "490050.37",
+    "15.6"
+   ],
+   [
+    "2017-08",
+    645832.36,
+    "566299.08",
+    "14.0"
+   ],
+   [
+    "2017-09",
+    701077.49,
+    "645832.36",
+    "8.6"
+   ],
+   [
+    "2017-10",
+    751117.01,
+    "701077.49",
+    "7.1"
+   ],
+   [
+    "2017-11",
+    1153364.2,
+    "751117.01",
+    "53.6"
+   ],
+   [
+    "2017-12",
+    843078.29,
+    "1153364.2",
+    "-26.9"
+   ]
+  ]
+ },
+ {
+  "title": "Top category of each month",
+  "skills": "JOIN, RANK with PARTITION BY, share of total",
+  "question": "Which product category earned the most in each month, and what share of the month was it?",
+  "sql": "WITH category_month AS (\n    SELECT\n        DATE_TRUNC('month', i.order_date)::date AS month_start,\n        p.category,\n        SUM(i.item_total) AS revenue\n    FROM mart.fact_order_items AS i\n    JOIN mart.dim_product AS p ON p.product_id = i.product_id\n    WHERE i.is_delivered AND i.in_analysis_window\n    GROUP BY 1, 2\n),\nranked AS (\n    SELECT\n        month_start,\n        category,\n        revenue,\n        ROUND(100.0 * revenue / SUM(revenue) OVER (PARTITION BY month_start), 1) AS share_pct,\n        RANK() OVER (PARTITION BY month_start ORDER BY revenue DESC)           AS revenue_rank\n    FROM category_month\n)\nSELECT TO_CHAR(month_start, 'YYYY-MM') AS month, category, revenue, share_pct\nFROM ranked\nWHERE revenue_rank = 1\nORDER BY month_start",
+  "total_rows": 20,
+  "columns": [
+   "month",
+   "category",
+   "revenue",
+   "share_pct"
+  ],
+  "rows": [
+   [
+    "2017-01",
+    "furniture_decor",
+    15863.93,
+    12.4
+   ],
+   [
+    "2017-02",
+    "health_beauty",
+    25178.32,
+    9.3
+   ],
+   [
+    "2017-03",
+    "computers_accessories",
+    31286.73,
+    7.6
+   ],
+   [
+    "2017-04",
+    "bed_bath_table",
+    28700.38,
+    7.3
+   ],
+   [
+    "2017-05",
+    "health_beauty",
+    52254.72,
+    9.2
+   ],
+   [
+    "2017-06",
+    "cool_stuff",
+    42539.56,
+    8.7
+   ],
+   [
+    "2017-07",
+    "bed_bath_table",
+    73336.34,
+    13.0
+   ],
+   [
+    "2017-08",
+    "bed_bath_table",
+    65628.16,
+    10.2
+   ],
+   [
+    "2017-09",
+    "bed_bath_table",
+    61723.02,
+    8.8
+   ],
+   [
+    "2017-10",
+    "watches_gifts",
+    69770.94,
+    9.3
+   ],
+   [
+    "2017-11",
+    "bed_bath_table",
+    104963.58,
+    9.1
+   ],
+   [
+    "2017-12",
+    "watches_gifts",
+    74898.08,
+    8.9
+   ]
+  ]
+ },
+ {
+  "title": "Daily revenue with a 7-day rolling average",
+  "skills": "LEFT JOIN from a date dimension, window frame (ROWS BETWEEN)",
+  "question": "What did Black Friday week look like against the recent trend?",
+  "sql": "WITH daily AS (\n    SELECT\n        d.date_key,\n        COUNT(f.order_id)                                               AS orders,\n        COALESCE(SUM(f.order_revenue) FILTER (WHERE f.is_delivered), 0) AS revenue\n    FROM mart.dim_date AS d\n    LEFT JOIN mart.fact_orders AS f ON f.order_date = d.date_key\n    WHERE d.in_analysis_window\n    GROUP BY d.date_key\n),\nwith_average AS (\n    SELECT\n        date_key,\n        orders,\n        revenue,\n        ROUND(AVG(revenue) OVER (ORDER BY date_key ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 2) AS revenue_7d_avg\n    FROM daily\n)\nSELECT * FROM with_average\nWHERE date_key BETWEEN DATE '2017-11-20' AND DATE '2017-11-28'\nORDER BY date_key",
+  "total_rows": 9,
+  "columns": [
+   "date_key",
+   "orders",
+   "revenue",
+   "revenue_7d_avg"
+  ],
+  "rows": [
+   [
+    "2017-11-20",
+    230.0,
+    49072.99,
+    31678.49
+   ],
+   [
+    "2017-11-21",
+    228.0,
+    38506.59,
+    32785.81
+   ],
+   [
+    "2017-11-22",
+    201.0,
+    28780.67,
+    33143.25
+   ],
+   [
+    "2017-11-23",
+    283.0,
+    49748.15,
+    35644.97
+   ],
+   [
+    "2017-11-24",
+    1176.0,
+    175178.46,
+    55871.98
+   ],
+   [
+    "2017-11-25",
+    499.0,
+    70683.26,
+    62177.67
+   ],
+   [
+    "2017-11-26",
+    391.0,
+    52162.53,
+    66304.66
+   ],
+   [
+    "2017-11-27",
+    403.0,
+    55887.39,
+    67278.15
+   ],
+   [
+    "2017-11-28",
+    380.0,
+    55990.3,
+    69775.82
+   ]
+  ]
+ },
+ {
+  "title": "Where delivery is slowest",
+  "skills": "FILTER aggregates, HAVING, safe division",
+  "question": "Which states wait longest for delivery, and how does that show up in late rates and reviews?",
+  "sql": "SELECT\n    c.customer_state,\n    COUNT(*)                                                                 AS delivered_orders,\n    ROUND(AVG(f.delivery_days), 1)                                           AS avg_delivery_days,\n    ROUND(100.0 * COUNT(*) FILTER (WHERE f.is_late) / COUNT(f.is_late), 1)   AS late_delivery_pct,\n    ROUND(AVG(f.review_score), 2)                                            AS avg_review_score\nFROM mart.fact_orders AS f\nJOIN mart.dim_customer AS c ON c.customer_id = f.customer_id\nWHERE f.is_delivered AND f.in_analysis_window\nGROUP BY c.customer_state\nHAVING COUNT(*) >= 500\nORDER BY avg_delivery_days DESC\nLIMIT 8",
+  "total_rows": 8,
+  "columns": [
+   "customer_state",
+   "delivered_orders",
+   "avg_delivery_days",
+   "late_delivery_pct",
+   "avg_review_score"
+  ],
+  "rows": [
+   [
+    "PA",
+    942.0,
+    23.8,
+    11.3,
+    3.91
+   ],
+   [
+    "MA",
+    713.0,
+    21.5,
+    17.5,
+    3.83
+   ],
+   [
+    "CE",
+    1273.0,
+    21.2,
+    13.8,
+    3.94
+   ],
+   [
+    "PB",
+    516.0,
+    20.4,
+    10.5,
+    4.07
+   ],
+   [
+    "BA",
+    3253.0,
+    19.3,
+    12.2,
+    3.93
+   ],
+   [
+    "PE",
+    1587.0,
+    18.4,
+    9.6,
+    4.08
+   ],
+   [
+    "MT",
+    885.0,
+    18.1,
+    6.0,
+    4.14
+   ],
+   [
+    "ES",
+    1992.0,
+    15.8,
+    10.7,
+    4.08
+   ]
+  ]
+ },
+ {
+  "title": "Cohort retention",
+  "skills": "Chained CTEs, DISTINCT, FIRST_VALUE",
+  "question": "Of customers who first bought in a given month, what percentage bought again later?",
+  "sql": "WITH customer_months AS (\n    SELECT DISTINCT\n        c.customer_unique_id,\n        DATE_TRUNC('month', f.order_date)::date AS order_month\n    FROM mart.fact_orders AS f\n    JOIN mart.dim_customer AS c ON c.customer_id = f.customer_id\n    WHERE f.is_delivered AND f.in_analysis_window\n),\nfirst_purchase AS (\n    SELECT customer_unique_id, MIN(order_month) AS cohort_month\n    FROM customer_months\n    GROUP BY customer_unique_id\n),\ncohort_activity AS (\n    SELECT\n        fp.cohort_month,\n        ((EXTRACT(YEAR FROM cm.order_month) - EXTRACT(YEAR FROM fp.cohort_month)) * 12\n          + EXTRACT(MONTH FROM cm.order_month) - EXTRACT(MONTH FROM fp.cohort_month))::int AS months_since_first,\n        COUNT(*) AS active_customers\n    FROM customer_months AS cm\n    JOIN first_purchase AS fp ON fp.customer_unique_id = cm.customer_unique_id\n    GROUP BY 1, 2\n)\nSELECT\n    TO_CHAR(cohort_month, 'YYYY-MM') AS cohort,\n    months_since_first,\n    active_customers,\n    ROUND(100.0 * active_customers\n          / FIRST_VALUE(active_customers) OVER (PARTITION BY cohort_month ORDER BY months_since_first), 2) AS retention_pct\nFROM cohort_activity\nWHERE cohort_month = DATE '2017-06-01' AND months_since_first <= 5\nORDER BY months_since_first",
+  "total_rows": 6,
+  "columns": [
+   "cohort",
+   "months_since_first",
+   "active_customers",
+   "retention_pct"
+  ],
+  "rows": [
+   [
+    "2017-06",
+    0.0,
+    3037.0,
+    100.0
+   ],
+   [
+    "2017-06",
+    1.0,
+    15.0,
+    0.49
+   ],
+   [
+    "2017-06",
+    2.0,
+    12.0,
+    0.4
+   ],
+   [
+    "2017-06",
+    3.0,
+    13.0,
+    0.43
+   ],
+   [
+    "2017-06",
+    4.0,
+    9.0,
+    0.3
+   ],
+   [
+    "2017-06",
+    5.0,
+    12.0,
+    0.4
+   ]
+  ]
+ },
+ {
+  "title": "Root cause of an anomaly",
+  "skills": "Conditional aggregation against a baseline, window total, ranking",
+  "question": "On Black Friday 2017, which customer states caused the jump in revenue?",
+  "sql": "WITH state_daily AS (\n    SELECT\n        f.order_date,\n        c.customer_state,\n        SUM(f.order_revenue) FILTER (WHERE f.is_delivered) AS revenue\n    FROM mart.fact_orders AS f\n    JOIN mart.dim_customer AS c ON c.customer_id = f.customer_id\n    WHERE f.order_date BETWEEN DATE '2017-11-24' - 28 AND DATE '2017-11-24'\n    GROUP BY f.order_date, c.customer_state\n),\nactual_vs_baseline AS (\n    SELECT\n        customer_state,\n        COALESCE(SUM(revenue) FILTER (WHERE order_date = DATE '2017-11-24'), 0)        AS actual,\n        COALESCE(SUM(revenue) FILTER (WHERE order_date < DATE '2017-11-24'), 0) / 28.0 AS baseline\n    FROM state_daily\n    GROUP BY customer_state\n)\nSELECT\n    customer_state,\n    ROUND(actual, 0)            AS revenue_that_day,\n    ROUND(baseline, 0)          AS normal_daily_revenue,\n    ROUND(actual - baseline, 0) AS change,\n    ROUND(100.0 * (actual - baseline) / SUM(actual - baseline) OVER (), 1) AS share_of_change_pct\nFROM actual_vs_baseline\nORDER BY change DESC\nLIMIT 6",
+  "total_rows": 6,
+  "columns": [
+   "customer_state",
+   "revenue_that_day",
+   "normal_daily_revenue",
+   "change",
+   "share_of_change_pct"
+  ],
+  "rows": [
+   [
+    "SP",
+    56170.0,
+    9361.0,
+    46809.0,
+    31.7
+   ],
+   [
+    "RJ",
+    30616.0,
+    3991.0,
+    26626.0,
+    18.0
+   ],
+   [
+    "MG",
+    28278.0,
+    3064.0,
+    25214.0,
+    17.1
+   ],
+   [
+    "RS",
+    10583.0,
+    1787.0,
+    8796.0,
+    6.0
+   ],
+   [
+    "ES",
+    6916.0,
+    583.0,
+    6333.0,
+    4.3
+   ],
+   [
+    "SC",
+    7006.0,
+    1030.0,
+    5977.0,
+    4.0
+   ]
+  ]
+ }
+]

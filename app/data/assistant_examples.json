@@ -1,0 +1,234 @@
+[
+ {
+  "question": "Which month had the highest revenue?",
+  "sql": "SELECT year_month, revenue FROM kpi_monthly ORDER BY revenue DESC LIMIT 1",
+  "answer": "The month with the highest revenue was November 2017 (`2017-11`), with a revenue of R$ 1,153,364.20.",
+  "error": null,
+  "sources": [
+   "Show month-over-month revenue growth for 2017.",
+   "What is the average order value for each month?",
+   "How much revenue came from each payment type?",
+   "What are the top 3 categories by revenue in each quarter of 2018?",
+   "Month-over-month growth",
+   "kpi_monthly_by_payment_type"
+  ],
+  "columns": [
+   "year_month",
+   "revenue"
+  ],
+  "rows": [
+   [
+    "2017-11",
+    1153364.2
+   ]
+  ]
+ },
+ {
+  "question": "What are the top 5 product categories by revenue?",
+  "sql": "SELECT p.category, SUM(i.item_total) AS revenue FROM fact_order_items AS i JOIN dim_product AS p ON p.product_id = i.product_id WHERE i.is_delivered AND i.in_analysis_window GROUP BY p.category ORDER BY revenue DESC LIMIT 5",
+  "answer": "The top 5 product categories by revenue are health_beauty (R$ 1,407,759.78), watches_gifts (R$ 1,261,539.41), bed_bath_table (R$ 1,224,602.68), sports_leisure (R$ 1,115,766.15), and computers_accessories (R$ 1,031,861.93).",
+  "error": null,
+  "sources": [
+   "What are the top 3 categories by revenue in each quarter of 2018?",
+   "Who are the top 5 sellers by revenue?",
+   "How much revenue came from each payment type?",
+   "What was the total revenue in 2017?",
+   "Product category",
+   "kpi_monthly_by_category"
+  ],
+  "columns": [
+   "category",
+   "revenue"
+  ],
+  "rows": [
+   [
+    "health_beauty",
+    1407759.78
+   ],
+   [
+    "watches_gifts",
+    1261539.41
+   ],
+   [
+    "bed_bath_table",
+    1224602.68
+   ],
+   [
+    "sports_leisure",
+    1115766.15
+   ],
+   [
+    "computers_accessories",
+    1031861.93
+   ]
+  ]
+ },
+ {
+  "question": "Show the late delivery rate for each month of 2018.",
+  "sql": "SELECT year_month, late_delivery_rate FROM kpi_monthly WHERE year_month LIKE '2018-%' ORDER BY year_month LIMIT 500",
+  "answer": "In 2018, the late delivery rate ranged from 1.16 in June to 18.96 in March. Rates for the remaining months were 5.70 in January, 14.13 in February, 4.50 in April, 6.56 in May, 3.38 in July, and 6.19 in August.",
+  "error": null,
+  "sources": [
+   "Show the number of orders for each month of 2018.",
+   "Late delivery rate",
+   "Which 5 states have the highest late delivery rate, among states with at least 500 delivered orders?",
+   "What is the average order value for each month?",
+   "Show daily revenue and its 7-day average for the first week of March 2018.",
+   "kpi_monthly_by_state"
+  ],
+  "columns": [
+   "year_month",
+   "late_delivery_rate"
+  ],
+  "rows": [
+   [
+    "2018-01",
+    5.7
+   ],
+   [
+    "2018-02",
+    14.13
+   ],
+   [
+    "2018-03",
+    18.96
+   ],
+   [
+    "2018-04",
+    4.5
+   ],
+   [
+    "2018-05",
+    6.56
+   ],
+   [
+    "2018-06",
+    1.16
+   ],
+   [
+    "2018-07",
+    3.38
+   ],
+   [
+    "2018-08",
+    6.19
+   ]
+  ]
+ },
+ {
+  "question": "Which 5 states have the longest average delivery time?",
+  "sql": "SELECT customer_state, ROUND(CAST(AVG(delivery_days) AS DECIMAL), 2) AS avg_delivery_days FROM fact_orders AS f JOIN dim_customer AS c ON c.customer_id = f.customer_id WHERE f.in_analysis_window AND f.is_delivered GROUP BY customer_state ORDER BY avg_delivery_days DESC LIMIT 5",
+  "answer": "The 5 states with the longest average delivery time are RR with 29.91 days, AP with 27.19 days, AM with 26.43 days, AL with 24.52 days, and PA with 23.76 days.",
+  "error": null,
+  "sources": [
+   "Which 5 states have the highest late delivery rate, among states with at least 500 delivered orders?",
+   "Which 5 states placed the most orders?",
+   "Do late orders get lower review scores than on-time orders?",
+   "Delivery days",
+   "Late delivery rate",
+   "kpi_monthly_by_state"
+  ],
+  "columns": [
+   "customer_state",
+   "avg_delivery_days"
+  ],
+  "rows": [
+   [
+    "RR",
+    29.91
+   ],
+   [
+    "AP",
+    27.19
+   ],
+   [
+    "AM",
+    26.43
+   ],
+   [
+    "AL",
+    24.52
+   ],
+   [
+    "PA",
+    23.76
+   ]
+  ]
+ },
+ {
+  "question": "What do customers complain about most in low-score reviews?",
+  "sql": "SELECT theme, COUNT(*) AS reviews FROM review_themes WHERE review_score <= 2 AND theme <> 'positive' GROUP BY theme ORDER BY reviews DESC LIMIT 500",
+  "answer": "Customers complain most about wrong or missing items (535 reviews) and not receiving their orders (417 reviews). Other top complaints include late delivery (283 reviews), issues with the seller or service (282 reviews), and poor quality (255 reviews).",
+  "error": null,
+  "sources": [
+   "What do customers complain about most in the labelled reviews?",
+   "Review score",
+   "Do late orders get lower review scores than on-time orders?",
+   "Review themes",
+   "review_themes",
+   "Which 5 states have the highest late delivery rate, among states with at least 500 delivered orders?"
+  ],
+  "columns": [
+   "theme",
+   "reviews"
+  ],
+  "rows": [
+   [
+    "wrong_or_missing_item",
+    535.0
+   ],
+   [
+    "not_received",
+    417.0
+   ],
+   [
+    "late_delivery",
+    283.0
+   ],
+   [
+    "seller_or_service",
+    282.0
+   ],
+   [
+    "poor_quality",
+    255.0
+   ],
+   [
+    "damaged_or_defective",
+    168.0
+   ],
+   [
+    "other",
+    34.0
+   ]
+  ]
+ },
+ {
+  "question": "Delete all orders from 2017",
+  "sql": null,
+  "answer": "Modifying data is strictly prohibited by business rules.",
+  "error": "The assistant could not write a query for this question.",
+  "sources": [
+   "Show the number of orders for each month of 2018.",
+   "Orders",
+   "How many orders are placed on each day of the week?",
+   "What is the average order value for each month?",
+   "Anomalies",
+   "Show month-over-month revenue growth for 2017."
+  ]
+ },
+ {
+  "question": "What will revenue be next year?",
+  "sql": null,
+  "answer": "We cannot predict future revenue from historical data.",
+  "error": "The assistant could not write a query for this question.",
+  "sources": [
+   "What was the total revenue in 2017?",
+   "Show month-over-month revenue growth for 2017.",
+   "How much revenue came from each payment type?",
+   "Who are the top 5 sellers by revenue?",
+   "Average order value (AOV)",
+   "Revenue"
+  ]
+ }
+]

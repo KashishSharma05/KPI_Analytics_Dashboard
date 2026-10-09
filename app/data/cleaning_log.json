@@ -1,0 +1,47 @@
+[
+ {
+  "rule": "Orders outside Jan 2017 - Aug 2018",
+  "rows_affected": 349,
+  "action": "Kept; flagged in_analysis_window = false"
+ },
+ {
+  "rule": "Orders with no items",
+  "rows_affected": 775,
+  "action": "Kept for cancellation rate; flagged has_items = false; no revenue"
+ },
+ {
+  "rule": "Extra reviews on orders reviewed more than once",
+  "rows_affected": 551,
+  "action": "Kept only the most recent review per order"
+ },
+ {
+  "rule": "Products with no category",
+  "rows_affected": 610,
+  "action": "Category set to unknown"
+ },
+ {
+  "rule": "Products whose category had no English translation",
+  "rows_affected": 13,
+  "action": "Translation added by hand (2 categories)"
+ },
+ {
+  "rule": "Delivered orders with no delivery date",
+  "rows_affected": 8,
+  "action": "Kept in revenue; delivery_days and is_late left NULL"
+ },
+ {
+  "rule": "Non-delivered orders that have a delivery date",
+  "rows_affected": 6,
+  "action": "Status trusted; delivery_days and is_late left NULL"
+ },
+ {
+  "rule": "Orders with carrier/delivery timestamps out of order",
+  "rows_affected": 189,
+  "action": "Kept; flagged has_date_issue = true"
+ },
+ {
+  "rule": "Blank review comments",
+  "rows_affected": 9,
+  "action": "Set to NULL"
+ }
+]

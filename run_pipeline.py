@@ -11,8 +11,9 @@ Steps, in order:
   6. find the drivers of each anomaly
   7. rebuild the review themes table from the saved LLM labels
   8. create the read-only user for the AI assistant
-  9. export CSV files for Power BI
- 10. build the weekly report (and email it if SMTP is set in .env)
+  9. export CSV files (full tables, and summary tables for the website)
+ 10. build the data behind the website's "How it was built" pages
+ 11. build the weekly report (and email it if SMTP is set in .env)
 
 Two AI jobs are run separately because they call the LLM many times:
   python -m src.ai.review_themes    label the review sample (only needed once)
@@ -23,7 +24,7 @@ import time
 
 from sqlalchemy import text
 
-from src import detect_anomalies, export, load, report
+from src import detect_anomalies, export, load, report, showcase
 from src.ai import review_themes
 from src.db import get_engine, run_sql_file
 
@@ -67,10 +68,13 @@ def main():
     step("8. Read-only user")
     run_sql_file("sql/07_readonly_role.sql")
 
-    step("9. Export for Power BI")
+    step("9. Export")
     export.main()
 
-    step("10. Weekly report")
+    step("10. Website data")
+    showcase.main()
+
+    step("11. Weekly report")
     report.main()
 
     print(f"\nPipeline finished in {time.time() - start:.1f} seconds.")
