@@ -34,6 +34,61 @@ KPI_LABELS = {
 }
 
 BLUE, RED, ORANGE, GREY = "#2563eb", "#dc2626", "#f59e0b", "#94a3b8"
+TEAL, NAVY = "#0d9488", "#1e3a8a"
+PALETTE = [BLUE, TEAL, ORANGE, RED, "#7c3aed", GREY]
+
+# Page styling: KPI numbers and charts sit in white tiles on a grey canvas,
+# and each report page starts with a coloured header band.
+STYLE = """
+<style>
+.block-container { padding-top: 4.2rem; }
+[data-testid="stMetric"] {
+    background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 14px 16px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+[data-testid="stMetricLabel"] { color: #6b7280; }
+[data-testid="stMetricValue"], [data-testid="stMetricValue"] * { font-size: 1.4rem !important; }
+[data-testid="stMetricDelta"] { font-size: 0.78rem; }
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: #ffffff; border-radius: 8px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+.report-header {
+    background: #1e3a8a; color: #ffffff; padding: 14px 22px; border-radius: 8px;
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+}
+.report-header .title { font-size: 1.35rem; font-weight: 700; }
+.report-header .subtitle { font-size: 0.85rem; opacity: 0.85; }
+.report-header .right { font-size: 0.85rem; text-align: right; opacity: 0.9; }
+.tile-title { font-weight: 600; color: #374151; font-size: 0.95rem; margin-bottom: -6px; }
+</style>
+"""
+
+
+def apply_style():
+    """Add the shared CSS to the page."""
+    st.markdown(STYLE, unsafe_allow_html=True)
+
+
+def report_header(title, subtitle, right=""):
+    """Coloured band at the top of a report page."""
+    st.markdown(
+        f'''<div class="report-header">
+                <div><div class="title">{title}</div><div class="subtitle">{subtitle}</div></div>
+                <div class="right">{right}</div>
+            </div>''',
+        unsafe_allow_html=True,
+    )
+
+
+def chart_layout(figure, height=300):
+    """Same compact look for every chart inside a tile."""
+    figure.update_layout(
+        height=height, margin=dict(l=8, r=8, t=8, b=8), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        legend=dict(orientation="h", y=1.12, x=0), font=dict(size=12), colorway=PALETTE,
+    )
+    figure.update_xaxes(showgrid=False)
+    figure.update_yaxes(gridcolor="#e5e7eb", zeroline=False)
+    return figure
 
 
 @st.cache_data
@@ -54,22 +109,34 @@ def result_table(item):
     return pd.DataFrame(item["rows"], columns=item["columns"])
 
 
-def month_filter():
-    """Sidebar slider to pick a range of months. The choice is kept across pages."""
+def month_filter(where=None):
+    """Slider to pick a range of months (in the sidebar unless another place is given).
+
+    Streamlit forgets a widget's value when the user visits a page that does
+    not show that widget. So the choice is also copied to "saved_period" and
+    used as the starting value, which keeps the filter the same on every page.
+    """
+    where = where or st.sidebar
     months = sorted(load("monthly_state")["month_start"].unique())
     labels = [pd.Timestamp(m).strftime("%b %Y") for m in months]
-    start_label, end_label = st.sidebar.select_slider(
-        "Period", options=labels, value=st.session_state.get("period", (labels[0], labels[-1])), key="period"
-    )
+    saved = st.session_state.get("saved_period", (labels[0], labels[-1]))
+
+    start_label, end_label = where.select_slider("Period", options=labels, value=saved, key="period_widget")
+    st.session_state["saved_period"] = (start_label, end_label)
+
     start = pd.Timestamp(months[labels.index(start_label)])
     end = pd.Timestamp(months[labels.index(end_label)]) + pd.offsets.MonthEnd(0)
     return start, end
 
 
-def state_filter():
-    """Sidebar multiselect for customer states. Empty means all states."""
+def state_filter(where=None):
+    """Multiselect for customer states. Empty means all states. Kept across pages like the period."""
+    where = where or st.sidebar
     states = sorted(load("monthly_state")["customer_state"].unique())
-    return st.sidebar.multiselect("Customer state", states, key="states", placeholder="All states")
+    chosen = where.multiselect("Customer state", states, default=st.session_state.get("saved_states", []),
+                               key="states_widget", placeholder="All states")
+    st.session_state["saved_states"] = chosen
+    return chosen
 
 
 def add_kpis(df):

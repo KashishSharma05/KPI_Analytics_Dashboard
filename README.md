@@ -18,7 +18,7 @@ An end-to-end analytics project on 100K real e-commerce orders: a SQL data model
 | Anomalies | Rolling z-score, IQR and Isolation Forest on daily KPIs | `src/detect_anomalies.py` |
 | Root cause | For each major anomaly, which categories, states and payment types drove it | `sql/06_root_cause.sql` |
 | Review intelligence | An LLM sorts Portuguese review comments into complaint themes | `src/ai/review_themes.py` |
-| Website and dashboard | Project home page, four dashboard pages, and two pages on how it was built | `app/dashboard.py`, `app/views/` |
+| Website and dashboard | Project home page, five dashboard pages, and two pages on how it was built | `app/dashboard.py`, `app/views/` |
 | Ask-Your-Data | English question → SQL → answer and chart, with RAG and safety checks | `src/ai/`, `app/ask_your_data.py` |
 | Reporting | Weekly summary email with KPIs, anomalies and an AI-written summary | `src/report.py` |
 
@@ -85,7 +85,7 @@ One Streamlit app (`app/dashboard.py`) presents the whole project.
 | Section | Pages |
 |---|---|
 | Project | Home: what was built, headline numbers, the main findings |
-| Dashboard | Overview · Sales drill-down · Anomalies and root cause · Delivery and customer voice |
+| Dashboard | Executive report (one-page BI-style summary with slicers) · Trends and anomalies · Sales drill-down · Anomalies and root cause · Delivery and customer voice |
 | How it was built | Data model and SQL (cleaning rules, star schema, featured queries with results) · AI assistant (flow, recorded examples, accuracy, safety tests) |
 
 The dashboard pages share a period filter and a state filter. Their data files hold counts and sums rather than ready-made averages, so every KPI is recalculated exactly for whatever is selected; the totals match the SQL views.

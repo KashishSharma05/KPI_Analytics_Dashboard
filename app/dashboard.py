@@ -17,16 +17,20 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 from dotenv import load_dotenv
 
+from common import apply_style
+
 load_dotenv()
 
 st.set_page_config(page_title="KPI Analytics & Anomaly Monitoring", page_icon="📊", layout="wide")
+apply_style()
 
 pages = {
     "Project": [
         st.Page("views/home.py", title="Home", icon="🏠", default=True),
     ],
     "Dashboard": [
-        st.Page("views/overview.py", title="Overview", icon="📈"),
+        st.Page("views/executive.py", title="Executive report", icon="📊"),
+        st.Page("views/overview.py", title="Trends & anomalies", icon="📈"),
         st.Page("views/sales.py", title="Sales drill-down", icon="🛒"),
         st.Page("views/anomalies.py", title="Anomalies & root cause", icon="🚨"),
         st.Page("views/customers.py", title="Delivery & customer voice", icon="🚚"),

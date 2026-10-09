@@ -57,10 +57,10 @@ st.graphviz_chart(
 
 st.subheader("Explore")
 links = [
-    ("views/overview.py", "Dashboard: KPIs and anomalies", "📈"),
+    ("views/executive.py", "Executive report: everything on one page", "📊"),
     ("views/sales.py", "Sales by category, state and payment", "🛒"),
     ("views/anomalies.py", "Anomalies and what drove them", "🚨"),
-    ("views/customers.py", "Delivery, reviews and retention", "🚚"),
+    ("views/overview.py", "Daily trends and anomalies", "📈"),
     ("views/built_data.py", "The data model and the SQL behind it", "🗄️"),
     ("views/built_ai.py", "The AI assistant and how it was tested", "🤖"),
 ]
