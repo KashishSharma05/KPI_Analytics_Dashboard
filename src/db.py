@@ -25,9 +25,19 @@ def run_sql_file(path):
     """Run every statement in a .sql file inside one transaction."""
     with open(path, encoding="utf-8") as sql_file:
         sql = sql_file.read()
-    # engine.begin() commits at the end, or rolls everything back on an error.
-    with get_engine().begin() as connection:
-        connection.exec_driver_sql(sql)
+
+    # The low-level connection sends the file to PostgreSQL exactly as written.
+    # (Through SQLAlchemy, a "%" inside the SQL would be read as a parameter marker.)
+    connection = get_engine().raw_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+        connection.commit()  # save only if the whole file ran without an error
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 
 
 if __name__ == "__main__":
