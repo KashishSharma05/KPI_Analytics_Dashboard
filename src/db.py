@@ -21,6 +21,15 @@ def get_engine():
     return create_engine(database_url)
 
 
+def run_sql_file(path):
+    """Run every statement in a .sql file inside one transaction."""
+    with open(path, encoding="utf-8") as sql_file:
+        sql = sql_file.read()
+    # engine.begin() commits at the end, or rolls everything back on an error.
+    with get_engine().begin() as connection:
+        connection.exec_driver_sql(sql)
+
+
 if __name__ == "__main__":
     # Quick connection test: python -m src.db
     with get_engine().connect() as connection:
