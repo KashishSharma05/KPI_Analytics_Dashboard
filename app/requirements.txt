@@ -1,0 +1,7 @@
+# Packages the website needs. Kept separate from the project's full
+# requirements.txt so the hosted site installs quickly.
+streamlit==1.65.0
+pandas==3.0.6
+plotly==7.1.0
+matplotlib==3.11.2
+python-dotenv==1.2.4

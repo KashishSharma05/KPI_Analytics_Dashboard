@@ -10,8 +10,8 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(APP_DIR)
 DATA_DIR = os.path.join(APP_DIR, "data")
 
-# Link to the source code, shown on the home page. Left empty until the repository is public.
-GITHUB_URL = ""
+# Link to the source code, shown on the home page.
+GITHUB_URL = "https://github.com/KashishSharma05/KPI_Analytics_Dashboard"
 
 # Columns to read as dates in each summary file.
 DATE_COLUMNS = {
