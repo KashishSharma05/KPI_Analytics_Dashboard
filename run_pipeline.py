@@ -9,14 +9,23 @@ Steps, in order:
   4. create the KPI views and cohort retention
   5. detect anomalies
   6. find the drivers of each anomaly
-  7. create the read-only user for the AI assistant
-  8. export CSV files for Power BI
+  7. rebuild the review themes table from the saved LLM labels
+  8. create the read-only user for the AI assistant
+  9. export CSV files for Power BI
+ 10. build the weekly report (and email it if SMTP is set in .env)
+
+Two AI jobs are run separately because they call the LLM many times:
+  python -m src.ai.review_themes    label the review sample (only needed once)
+  python -m src.ai.knowledge_base   rebuild the search index after editing knowledge/
 """
 
 import time
 
-from src import detect_anomalies, export, load
-from src.db import run_sql_file
+from sqlalchemy import text
+
+from src import detect_anomalies, export, load, report
+from src.ai import review_themes
+from src.db import get_engine, run_sql_file
 
 
 def step(title):
@@ -45,11 +54,24 @@ def main():
     step("6. Root cause of anomalies")
     run_sql_file("sql/06_root_cause.sql")
 
-    step("7. Read-only user")
+    step("7. Review themes")
+    engine = get_engine()
+    with engine.connect() as connection:
+        labels_exist = connection.execute(text("SELECT to_regclass('ai.review_labels')")).scalar()
+    if labels_exist:
+        review_themes.build_mart_table(engine)
+        print("mart.review_themes rebuilt from saved labels.")
+    else:
+        print("No labels yet. Run: python -m src.ai.review_themes")
+
+    step("8. Read-only user")
     run_sql_file("sql/07_readonly_role.sql")
 
-    step("8. Export for Power BI")
+    step("9. Export for Power BI")
     export.main()
+
+    step("10. Weekly report")
+    report.main()
 
     print(f"\nPipeline finished in {time.time() - start:.1f} seconds.")
 
