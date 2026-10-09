@@ -1,0 +1,19 @@
+# data and analysis
+pandas==3.0.6
+numpy==2.5.3
+scipy==1.18.1
+scikit-learn==1.9.1
+matplotlib==3.11.2
+seaborn==0.13.2
+notebook==7.6.3
+
+# database
+SQLAlchemy==2.1.4
+psycopg2-binary==2.9.13
+python-dotenv==1.2.4
+
+# AI layer (Phase 5 onwards)
+google-genai==2.29.0
+faiss-cpu==1.15.1
+sqlglot==30.21.0
+streamlit==1.65.0
