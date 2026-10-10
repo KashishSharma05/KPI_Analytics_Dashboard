@@ -2,6 +2,8 @@
 
 An end-to-end analytics project on 100K real e-commerce orders: a SQL data model and KPI layer, statistical anomaly detection with root-cause analysis, an interactive dashboard, and an AI assistant that answers business questions in plain English by writing and safely running SQL.
 
+**Live site:** https://kashishsharma05-kpi-analytics-dashboard-appdashboard-kq2ijx.streamlit.app/
+
 **Stack:** PostgreSQL · SQL · Python (Pandas, SciPy, scikit-learn) · Streamlit · Plotly · Google Gemini · FAISS
 
 ---
