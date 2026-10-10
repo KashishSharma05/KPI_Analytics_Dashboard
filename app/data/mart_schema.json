@@ -1,0 +1,768 @@
+{
+ "anomalies": [
+  {
+   "name": "anomaly_date",
+   "type": "date"
+  },
+  {
+   "name": "kpi",
+   "type": "text"
+  },
+  {
+   "name": "value",
+   "type": "double precision"
+  },
+  {
+   "name": "expected",
+   "type": "double precision"
+  },
+  {
+   "name": "deviation_pct",
+   "type": "double precision"
+  },
+  {
+   "name": "z_score",
+   "type": "double precision"
+  },
+  {
+   "name": "direction",
+   "type": "text"
+  },
+  {
+   "name": "flag_zscore",
+   "type": "boolean"
+  },
+  {
+   "name": "flag_iqr",
+   "type": "boolean"
+  },
+  {
+   "name": "flag_isolation_forest",
+   "type": "boolean"
+  },
+  {
+   "name": "methods_agreeing",
+   "type": "bigint"
+  },
+  {
+   "name": "severity",
+   "type": "text"
+  }
+ ],
+ "anomaly_drivers": [
+  {
+   "name": "anomaly_date",
+   "type": "date"
+  },
+  {
+   "name": "kpi",
+   "type": "text"
+  },
+  {
+   "name": "dimension",
+   "type": "text"
+  },
+  {
+   "name": "segment",
+   "type": "text"
+  },
+  {
+   "name": "actual",
+   "type": "numeric"
+  },
+  {
+   "name": "baseline",
+   "type": "numeric"
+  },
+  {
+   "name": "change",
+   "type": "numeric"
+  },
+  {
+   "name": "contribution_pct",
+   "type": "numeric"
+  },
+  {
+   "name": "driver_rank",
+   "type": "bigint"
+  }
+ ],
+ "cohort_retention": [
+  {
+   "name": "cohort_month",
+   "type": "date"
+  },
+  {
+   "name": "months_since_first",
+   "type": "integer"
+  },
+  {
+   "name": "active_customers",
+   "type": "bigint"
+  },
+  {
+   "name": "cohort_size",
+   "type": "bigint"
+  },
+  {
+   "name": "retention_pct",
+   "type": "numeric"
+  }
+ ],
+ "customer_monthly": [
+  {
+   "name": "month_start",
+   "type": "date"
+  },
+  {
+   "name": "active_customers",
+   "type": "bigint"
+  },
+  {
+   "name": "new_customers",
+   "type": "bigint"
+  },
+  {
+   "name": "returning_customers",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue_new",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_returning",
+   "type": "numeric"
+  }
+ ],
+ "customer_summary": [
+  {
+   "name": "customer_unique_id",
+   "type": "character varying"
+  },
+  {
+   "name": "first_order_date",
+   "type": "date"
+  },
+  {
+   "name": "first_order_month",
+   "type": "date"
+  },
+  {
+   "name": "second_order_date",
+   "type": "date"
+  },
+  {
+   "name": "delivered_orders",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "first_state",
+   "type": "character"
+  },
+  {
+   "name": "first_category",
+   "type": "text"
+  }
+ ],
+ "dim_customer": [
+  {
+   "name": "customer_id",
+   "type": "character varying"
+  },
+  {
+   "name": "customer_unique_id",
+   "type": "character varying"
+  },
+  {
+   "name": "customer_city",
+   "type": "text"
+  },
+  {
+   "name": "customer_state",
+   "type": "character"
+  }
+ ],
+ "dim_date": [
+  {
+   "name": "date_key",
+   "type": "date"
+  },
+  {
+   "name": "year",
+   "type": "integer"
+  },
+  {
+   "name": "quarter",
+   "type": "integer"
+  },
+  {
+   "name": "month",
+   "type": "integer"
+  },
+  {
+   "name": "month_name",
+   "type": "text"
+  },
+  {
+   "name": "year_month",
+   "type": "text"
+  },
+  {
+   "name": "month_start",
+   "type": "date"
+  },
+  {
+   "name": "week_start",
+   "type": "date"
+  },
+  {
+   "name": "day_of_week",
+   "type": "integer"
+  },
+  {
+   "name": "day_name",
+   "type": "text"
+  },
+  {
+   "name": "is_weekend",
+   "type": "boolean"
+  },
+  {
+   "name": "in_analysis_window",
+   "type": "boolean"
+  },
+  {
+   "name": "is_complete_data",
+   "type": "boolean"
+  }
+ ],
+ "dim_product": [
+  {
+   "name": "product_id",
+   "type": "character varying"
+  },
+  {
+   "name": "category",
+   "type": "text"
+  }
+ ],
+ "dim_seller": [
+  {
+   "name": "seller_id",
+   "type": "character varying"
+  },
+  {
+   "name": "seller_city",
+   "type": "text"
+  },
+  {
+   "name": "seller_state",
+   "type": "character"
+  }
+ ],
+ "fact_order_items": [
+  {
+   "name": "order_id",
+   "type": "character varying"
+  },
+  {
+   "name": "order_item_id",
+   "type": "integer"
+  },
+  {
+   "name": "product_id",
+   "type": "character varying"
+  },
+  {
+   "name": "seller_id",
+   "type": "character varying"
+  },
+  {
+   "name": "customer_id",
+   "type": "character varying"
+  },
+  {
+   "name": "order_date",
+   "type": "date"
+  },
+  {
+   "name": "is_delivered",
+   "type": "boolean"
+  },
+  {
+   "name": "in_analysis_window",
+   "type": "boolean"
+  },
+  {
+   "name": "price",
+   "type": "numeric"
+  },
+  {
+   "name": "freight_value",
+   "type": "numeric"
+  },
+  {
+   "name": "item_total",
+   "type": "numeric"
+  }
+ ],
+ "fact_orders": [
+  {
+   "name": "order_id",
+   "type": "character varying"
+  },
+  {
+   "name": "customer_id",
+   "type": "character varying"
+  },
+  {
+   "name": "order_date",
+   "type": "date"
+  },
+  {
+   "name": "order_purchase_timestamp",
+   "type": "timestamp without time zone"
+  },
+  {
+   "name": "order_status",
+   "type": "text"
+  },
+  {
+   "name": "is_delivered",
+   "type": "boolean"
+  },
+  {
+   "name": "is_canceled",
+   "type": "boolean"
+  },
+  {
+   "name": "in_analysis_window",
+   "type": "boolean"
+  },
+  {
+   "name": "item_count",
+   "type": "bigint"
+  },
+  {
+   "name": "items_value",
+   "type": "numeric"
+  },
+  {
+   "name": "freight_value",
+   "type": "numeric"
+  },
+  {
+   "name": "order_revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "payment_value",
+   "type": "numeric"
+  },
+  {
+   "name": "payment_installments",
+   "type": "integer"
+  },
+  {
+   "name": "main_payment_type",
+   "type": "text"
+  },
+  {
+   "name": "delivery_days",
+   "type": "numeric"
+  },
+  {
+   "name": "is_late",
+   "type": "boolean"
+  },
+  {
+   "name": "review_score",
+   "type": "integer"
+  },
+  {
+   "name": "has_review_comment",
+   "type": "boolean"
+  }
+ ],
+ "kpi_daily": [
+  {
+   "name": "date_key",
+   "type": "date"
+  },
+  {
+   "name": "day_name",
+   "type": "text"
+  },
+  {
+   "name": "is_complete_data",
+   "type": "boolean"
+  },
+  {
+   "name": "orders",
+   "type": "bigint"
+  },
+  {
+   "name": "delivered_orders",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "aov",
+   "type": "numeric"
+  },
+  {
+   "name": "cancellation_rate",
+   "type": "numeric"
+  },
+  {
+   "name": "late_delivery_rate",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_delivery_days",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_review_score",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_7d_avg",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_28d_avg",
+   "type": "numeric"
+  },
+  {
+   "name": "orders_7d_avg",
+   "type": "numeric"
+  }
+ ],
+ "kpi_monthly": [
+  {
+   "name": "month_start",
+   "type": "date"
+  },
+  {
+   "name": "year_month",
+   "type": "text"
+  },
+  {
+   "name": "orders",
+   "type": "bigint"
+  },
+  {
+   "name": "delivered_orders",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "aov",
+   "type": "numeric"
+  },
+  {
+   "name": "cancellation_rate",
+   "type": "numeric"
+  },
+  {
+   "name": "late_delivery_rate",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_delivery_days",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_review_score",
+   "type": "numeric"
+  },
+  {
+   "name": "previous_month_revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_mom_growth_pct",
+   "type": "numeric"
+  },
+  {
+   "name": "orders_mom_growth_pct",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_running_total",
+   "type": "numeric"
+  }
+ ],
+ "kpi_monthly_by_category": [
+  {
+   "name": "month_start",
+   "type": "date"
+  },
+  {
+   "name": "category",
+   "type": "text"
+  },
+  {
+   "name": "orders",
+   "type": "bigint"
+  },
+  {
+   "name": "items_sold",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_share_pct",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_rank",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue_mom_growth_pct",
+   "type": "numeric"
+  }
+ ],
+ "kpi_monthly_by_payment_type": [
+  {
+   "name": "month_start",
+   "type": "date"
+  },
+  {
+   "name": "main_payment_type",
+   "type": "text"
+  },
+  {
+   "name": "orders",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_installments",
+   "type": "numeric"
+  },
+  {
+   "name": "orders_share_pct",
+   "type": "numeric"
+  }
+ ],
+ "kpi_monthly_by_state": [
+  {
+   "name": "month_start",
+   "type": "date"
+  },
+  {
+   "name": "customer_state",
+   "type": "character"
+  },
+  {
+   "name": "orders",
+   "type": "bigint"
+  },
+  {
+   "name": "delivered_orders",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "aov",
+   "type": "numeric"
+  },
+  {
+   "name": "late_delivery_rate",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_delivery_days",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_review_score",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_share_pct",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_rank",
+   "type": "bigint"
+  }
+ ],
+ "kpi_weekly": [
+  {
+   "name": "week_start",
+   "type": "date"
+  },
+  {
+   "name": "days_in_week",
+   "type": "bigint"
+  },
+  {
+   "name": "is_complete_data",
+   "type": "boolean"
+  },
+  {
+   "name": "orders",
+   "type": "bigint"
+  },
+  {
+   "name": "delivered_orders",
+   "type": "bigint"
+  },
+  {
+   "name": "revenue",
+   "type": "numeric"
+  },
+  {
+   "name": "aov",
+   "type": "numeric"
+  },
+  {
+   "name": "cancellation_rate",
+   "type": "numeric"
+  },
+  {
+   "name": "late_delivery_rate",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_delivery_days",
+   "type": "numeric"
+  },
+  {
+   "name": "avg_review_score",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_wow_growth_pct",
+   "type": "numeric"
+  }
+ ],
+ "order_funnel_monthly": [
+  {
+   "name": "month_start",
+   "type": "date"
+  },
+  {
+   "name": "placed",
+   "type": "bigint"
+  },
+  {
+   "name": "approved",
+   "type": "bigint"
+  },
+  {
+   "name": "shipped",
+   "type": "bigint"
+  },
+  {
+   "name": "delivered",
+   "type": "bigint"
+  },
+  {
+   "name": "delivered_on_time",
+   "type": "bigint"
+  },
+  {
+   "name": "on_time_and_happy",
+   "type": "bigint"
+  }
+ ],
+ "repeat_by_first_category": [
+  {
+   "name": "first_category",
+   "type": "text"
+  },
+  {
+   "name": "customers",
+   "type": "bigint"
+  },
+  {
+   "name": "repeat_customers",
+   "type": "bigint"
+  },
+  {
+   "name": "repeat_rate_pct",
+   "type": "numeric"
+  },
+  {
+   "name": "revenue_per_customer",
+   "type": "numeric"
+  }
+ ],
+ "repeat_customer_summary": [
+  {
+   "name": "customers",
+   "type": "bigint"
+  },
+  {
+   "name": "repeat_customers",
+   "type": "bigint"
+  },
+  {
+   "name": "repeat_customer_pct",
+   "type": "numeric"
+  }
+ ],
+ "review_themes": [
+  {
+   "name": "order_id",
+   "type": "character varying"
+  },
+  {
+   "name": "order_date",
+   "type": "date"
+  },
+  {
+   "name": "review_score",
+   "type": "integer"
+  },
+  {
+   "name": "theme",
+   "type": "text"
+  },
+  {
+   "name": "sentiment",
+   "type": "text"
+  },
+  {
+   "name": "english_summary",
+   "type": "text"
+  },
+  {
+   "name": "is_late",
+   "type": "boolean"
+  },
+  {
+   "name": "delivery_days",
+   "type": "numeric"
+  },
+  {
+   "name": "customer_state",
+   "type": "character"
+  }
+ ]
+}

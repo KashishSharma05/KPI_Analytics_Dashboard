@@ -18,3 +18,4 @@ google-genai==2.29.0
 faiss-cpu==1.15.1
 sqlglot==30.21.0
 streamlit==1.65.0
+duckdb==1.5.6

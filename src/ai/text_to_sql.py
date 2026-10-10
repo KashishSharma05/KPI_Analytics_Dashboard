@@ -20,10 +20,9 @@ import sys
 
 import pandas as pd
 
-from src.ai import knowledge_base
+from src.ai import hosted, knowledge_base
 from src.ai.llm import ask, ensure_cache_table
 from src.ai.sql_guard import UnsafeSQLError, check_sql, get_allowed_tables, run_readonly
-from src.db import get_engine
 
 SQL_PROMPT = """You write PostgreSQL queries for a business analyst.
 
@@ -70,6 +69,10 @@ def get_resources():
 
 def describe_schema():
     """One line per table: name(column type, column type, ...), read from the database."""
+    if hosted.use_hosted_copy():
+        return hosted.describe_schema()
+    from src.db import get_engine
+
     columns = pd.read_sql(
         """SELECT table_name, column_name, data_type
            FROM information_schema.columns

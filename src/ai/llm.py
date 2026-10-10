@@ -6,6 +6,9 @@ What this wrapper adds on top of the plain API call:
   - JSON output, parsed into Python objects
   - a cache table (ai.llm_cache), so the same prompt is never paid for twice
     and an interrupted job can continue where it stopped
+
+On the hosted website there is no PostgreSQL database, so the cache there
+is a dictionary that lasts as long as the site keeps running.
 """
 
 import hashlib
@@ -16,9 +19,6 @@ import time
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors, types
-from sqlalchemy import text
-
-from src.db import get_engine
 
 load_dotenv()
 
@@ -32,6 +32,11 @@ SECONDS_BETWEEN_CALLS = 4.5  # at most about 13 requests a minute
 
 _client = None
 _last_call_time = 0.0
+_memory_cache = {}
+
+
+def has_database():
+    return bool(os.getenv("DATABASE_URL"))
 
 
 def get_client():
@@ -47,6 +52,12 @@ def get_client():
 
 def ensure_cache_table():
     """The cache lives in its own schema (ai) so rebuilding mart does not delete it."""
+    if not has_database():
+        return
+    from sqlalchemy import text
+
+    from src.db import get_engine
+
     with get_engine().begin() as connection:
         connection.execute(text("CREATE SCHEMA IF NOT EXISTS ai"))
         connection.execute(
@@ -62,6 +73,12 @@ def ensure_cache_table():
 
 
 def _cache_get(prompt_hash):
+    if not has_database():
+        return _memory_cache.get(prompt_hash)
+    from sqlalchemy import text
+
+    from src.db import get_engine
+
     with get_engine().connect() as connection:
         return connection.execute(
             text("SELECT response FROM ai.llm_cache WHERE prompt_hash = :h"), {"h": prompt_hash}
@@ -69,6 +86,13 @@ def _cache_get(prompt_hash):
 
 
 def _cache_put(prompt_hash, model, response):
+    if not has_database():
+        _memory_cache[prompt_hash] = response
+        return
+    from sqlalchemy import text
+
+    from src.db import get_engine
+
     with get_engine().begin() as connection:
         connection.execute(
             text(

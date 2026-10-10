@@ -8,15 +8,18 @@ Two independent layers, so one mistake is not enough to cause damage:
   1. this code rejects anything that is not a plain SELECT
   2. the database user analyst_readonly has no permission to change data
 
+On the hosted website there is no PostgreSQL server. There the checked
+query runs on a read-only DuckDB copy of the mart schema (see hosted.py);
+the check in this file is the same in both places.
+
 Self-test:  python -m src.ai.sql_guard
 """
 
 import pandas as pd
-import psycopg2
 import sqlglot
 from sqlglot import exp
 
-from src.db import get_engine
+from src.ai import hosted
 
 MAX_ROWS = 500
 READONLY_USER = "analyst_readonly"
@@ -43,6 +46,10 @@ class UnsafeSQLError(Exception):
 
 def get_allowed_tables():
     """Names of every table and view in the mart schema."""
+    if hosted.use_hosted_copy():
+        return hosted.get_allowed_tables()
+    from src.db import get_engine
+
     sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'mart'"
     return set(pd.read_sql(sql, get_engine())["table_name"])
 
@@ -96,6 +103,12 @@ def check_sql(sql, allowed_tables):
 
 def run_readonly(safe_sql):
     """Run already-checked SQL as the read-only user and return a DataFrame."""
+    if hosted.use_hosted_copy():
+        return hosted.run_readonly(safe_sql)
+    import psycopg2
+
+    from src.db import get_engine
+
     # Same server and database as the project, but logged in as the read-only user.
     url = get_engine().url
     connection = psycopg2.connect(host=url.host, port=url.port, dbname=url.database, user=READONLY_USER)

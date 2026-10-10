@@ -35,7 +35,8 @@ st.graphviz_chart(
 
 # -------------------------------------------------------------------- examples
 st.subheader("Recorded examples")
-st.caption("Real questions put to the assistant, with the SQL it wrote and what it answered.")
+st.caption("Real questions put to the assistant, with the SQL it wrote and what it answered. "
+           "To ask your own, open **Ask your data** in the menu.")
 examples = load_json("assistant_examples")
 chosen = st.selectbox("Question", examples, format_func=lambda example: example["question"])
 
@@ -109,7 +110,8 @@ with left.container(border=True):
 with right.container(border=True):
     st.markdown("**2. A database user that cannot write**")
     st.write("The query runs as a user that has `SELECT` on `mart` only, inside a read-only transaction "
-             "with a 10-second timeout. Even a query that slipped past the code check could not change data.")
+             "with a 10-second timeout. Even a query that slipped past the code check could not change data. "
+             "On this hosted site the same tables are a DuckDB file opened read-only.")
 
 tests = pd.DataFrame(load_json("guard_tests"))
 passed = (tests["outcome"].str.split(":").str[0] == tests["expected"]).sum()
@@ -118,4 +120,5 @@ tests.columns = ["SQL tried", "Should be", "What happened"]
 st.dataframe(tests, width="stretch", hide_index=True, height=320)
 
 st.caption("Model: gemini-3.5-flash-lite, embeddings gemini-embedding-001. "
-           "The live chat runs on the project's own database, so on this hosted site it is shown as recorded examples.")
+           "The accuracy above was measured on the PostgreSQL database. The hosted chat runs the same queries on a "
+           "read-only DuckDB copy of the same tables.")

@@ -20,8 +20,9 @@ import numpy as np
 
 from src.ai.llm import embed
 
-KNOWLEDGE_DIR = "knowledge"
-INDEX_DIR = "knowledge/index"
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+KNOWLEDGE_DIR = os.path.join(PROJECT_DIR, "knowledge")
+INDEX_DIR = os.path.join(KNOWLEDGE_DIR, "index")
 
 
 def read_markdown_sections(path, kind):

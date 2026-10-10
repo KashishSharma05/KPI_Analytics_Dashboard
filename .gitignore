@@ -20,8 +20,5 @@ STEPS.md
 # exported CSVs are rebuilt by the pipeline
 data/exports/*.csv
 
-# search index is rebuilt from the knowledge files
-knowledge/index/
-
 # generated reports
 reports/

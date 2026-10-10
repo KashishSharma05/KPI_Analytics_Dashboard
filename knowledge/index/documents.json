@@ -1,0 +1,288 @@
+[
+ {
+  "kind": "definition",
+  "title": "Analysis window",
+  "text": "Analysis window: All KPIs cover January 2017 to August 2018. Every query on fact_orders or fact_order_items must filter `in_analysis_window = TRUE` unless the question asks for a specific date inside that range. The KPI views (kpi_daily, kpi_weekly, kpi_monthly and the kpi_monthly_by_* views) are already limited to this window."
+ },
+ {
+  "kind": "definition",
+  "title": "Revenue",
+  "text": "Revenue: Revenue = SUM(order_revenue) from fact_orders for DELIVERED orders only: `WHERE is_delivered`. order_revenue is price plus freight of all items in the order. Canceled or undelivered orders are never counted as revenue. At item level use SUM(item_total) from fact_order_items with `WHERE is_delivered`."
+ },
+ {
+  "kind": "definition",
+  "title": "Orders",
+  "text": "Orders: Orders = COUNT(*) of all orders placed, whatever their status. \"Delivered orders\" = orders with `is_delivered = TRUE`."
+ },
+ {
+  "kind": "definition",
+  "title": "Average order value (AOV)",
+  "text": "Average order value (AOV): AOV = revenue / number of delivered orders. Round to 2 decimals."
+ },
+ {
+  "kind": "definition",
+  "title": "Cancellation rate",
+  "text": "Cancellation rate: Cancellation rate = percentage of orders with `is_canceled = TRUE` (status canceled or unavailable). Formula: 100.0 * COUNT(*) FILTER (WHERE is_canceled) / COUNT(*). Rates are always given as a percentage between 0 and 100, rounded to 2 decimals."
+ },
+ {
+  "kind": "definition",
+  "title": "Late delivery rate",
+  "text": "Late delivery rate: An order is late when it was delivered after the estimated delivery date: `is_late = TRUE`. is_late is NULL when the order has no delivery date. Late delivery rate = 100.0 * COUNT(*) FILTER (WHERE is_late) / COUNT(is_late), as a percentage rounded to 2 decimals. COUNT(is_late) counts only orders that have delivery data."
+ },
+ {
+  "kind": "definition",
+  "title": "Delivery days",
+  "text": "Delivery days: delivery_days = days from purchase to delivery to the customer. Average delivery days = AVG(delivery_days); NULL values (not delivered) are ignored automatically."
+ },
+ {
+  "kind": "definition",
+  "title": "Review score",
+  "text": "Review score: review_score is 1 to 5, one review per order, NULL when the order has no review. Average review score = AVG(review_score). A \"low\" or \"bad\" review means review_score <= 2."
+ },
+ {
+  "kind": "definition",
+  "title": "Customers and repeat customers",
+  "text": "Customers and repeat customers: customer_id is different for every order. The real person is `customer_unique_id` in dim_customer. To count customers, count DISTINCT customer_unique_id. A repeat customer has 2 or more delivered orders."
+ },
+ {
+  "kind": "definition",
+  "title": "Month-over-month growth",
+  "text": "Month-over-month growth: MoM growth % = 100 * (this month - previous month) / previous month. It is already calculated in kpi_monthly as revenue_mom_growth_pct and orders_mom_growth_pct."
+ },
+ {
+  "kind": "definition",
+  "title": "Dates and months",
+  "text": "Dates and months: The order date is `order_date` (the day the order was placed). To group by month use DATE_TRUNC('month', order_date) or join dim_date and use year_month (text like '2018-03'). kpi_monthly has both month_start (date) and year_month (text)."
+ },
+ {
+  "kind": "definition",
+  "title": "Product category",
+  "text": "Product category: Category names are English snake_case text in dim_product.category, for example 'health_beauty', 'bed_bath_table', 'watches_gifts'. Products without a category have category = 'unknown'. Category analysis must use fact_order_items joined to dim_product, because one order can contain several categories."
+ },
+ {
+  "kind": "definition",
+  "title": "Customer state",
+  "text": "Customer state: customer_state in dim_customer is the 2-letter Brazilian state code, for example 'SP' (São Paulo), 'RJ' (Rio de Janeiro), 'MG' (Minas Gerais). Seller location is seller_state in dim_seller."
+ },
+ {
+  "kind": "definition",
+  "title": "Payment type",
+  "text": "Payment type: main_payment_type in fact_orders is the payment method that paid most of the order: credit_card, boleto, voucher, debit_card."
+ },
+ {
+  "kind": "definition",
+  "title": "Anomalies",
+  "text": "Anomalies: mart.anomalies lists unusual days per KPI. kpi is one of: orders, revenue, aov, late_delivery_rate, avg_review_score. severity is 'high' or 'medium'. direction is 'spike' or 'drop'. Black Friday is 2017-11-24."
+ },
+ {
+  "kind": "definition",
+  "title": "Anomaly drivers",
+  "text": "Anomaly drivers: mart.anomaly_drivers explains high-severity revenue and orders anomalies. dimension is one of: category, customer_state, payment_type. segment is the value inside that dimension. contribution_pct is the share of the day's total change caused by that segment. driver_rank 1 is the biggest driver."
+ },
+ {
+  "kind": "definition",
+  "title": "Review themes",
+  "text": "Review themes: mart.review_themes holds a SAMPLE of reviews labelled by an LLM. theme is one of: late_delivery, not_received, wrong_or_missing_item, damaged_or_defective, poor_quality, seller_or_service, positive, other. Because it is a sample weighted towards low scores, use it for counts inside the sample, not for totals of the whole business."
+ },
+ {
+  "kind": "table",
+  "title": "fact_orders",
+  "text": "fact_orders: One row per order. Columns: order_id, customer_id, order_date (date placed), order_purchase_timestamp, order_status, is_delivered, is_canceled, in_analysis_window, item_count, items_value, freight_value, order_revenue (price + freight), payment_value, payment_installments, main_payment_type, delivery_days, is_late, review_score, has_review_comment. Join to dim_customer on customer_id and to dim_date on order_date = date_key."
+ },
+ {
+  "kind": "table",
+  "title": "fact_order_items",
+  "text": "fact_order_items: One row per item in an order. Columns: order_id, order_item_id, product_id, seller_id, customer_id, order_date, is_delivered, in_analysis_window, price, freight_value, item_total (price + freight). Join to dim_product on product_id and dim_seller on seller_id. Use this table for category or seller questions."
+ },
+ {
+  "kind": "table",
+  "title": "dim_date",
+  "text": "dim_date: One row per calendar day. Columns: date_key, year, quarter, month, month_name, year_month ('YYYY-MM'), month_start, week_start, day_of_week (1 = Monday, 7 = Sunday), day_name ('Mon'...'Sun'), is_weekend, in_analysis_window, is_complete_data."
+ },
+ {
+  "kind": "table",
+  "title": "dim_customer",
+  "text": "dim_customer: One row per customer_id. Columns: customer_id, customer_unique_id (the real person), customer_city, customer_state."
+ },
+ {
+  "kind": "table",
+  "title": "dim_product",
+  "text": "dim_product: One row per product. Columns: product_id, category."
+ },
+ {
+  "kind": "table",
+  "title": "dim_seller",
+  "text": "dim_seller: One row per seller. Columns: seller_id, seller_city, seller_state."
+ },
+ {
+  "kind": "table",
+  "title": "kpi_daily",
+  "text": "kpi_daily: One row per day in the analysis window. Columns: date_key, day_name, is_complete_data, orders, delivered_orders, revenue, aov, cancellation_rate, late_delivery_rate, avg_delivery_days, avg_review_score, revenue_7d_avg, revenue_28d_avg, orders_7d_avg. Use it for questions about a specific day or daily trends."
+ },
+ {
+  "kind": "table",
+  "title": "kpi_weekly",
+  "text": "kpi_weekly: One row per week (week_start is a Monday). Columns: week_start, days_in_week, is_complete_data, orders, delivered_orders, revenue, aov, cancellation_rate, late_delivery_rate, avg_delivery_days, avg_review_score, revenue_wow_growth_pct."
+ },
+ {
+  "kind": "table",
+  "title": "kpi_monthly",
+  "text": "kpi_monthly: One row per month. Columns: month_start, year_month, orders, delivered_orders, revenue, aov, cancellation_rate, late_delivery_rate, avg_delivery_days, avg_review_score, previous_month_revenue, revenue_mom_growth_pct, orders_mom_growth_pct, revenue_running_total. Prefer this view for any monthly KPI question."
+ },
+ {
+  "kind": "table",
+  "title": "kpi_monthly_by_category",
+  "text": "kpi_monthly_by_category: One row per month and category (delivered orders only). Columns: month_start, category, orders, items_sold, revenue, revenue_share_pct, revenue_rank (1 = top category of that month), revenue_mom_growth_pct."
+ },
+ {
+  "kind": "table",
+  "title": "kpi_monthly_by_state",
+  "text": "kpi_monthly_by_state: One row per month and customer state. Columns: month_start, customer_state, orders, delivered_orders, revenue, aov, late_delivery_rate, avg_delivery_days, avg_review_score, revenue_share_pct, revenue_rank."
+ },
+ {
+  "kind": "table",
+  "title": "kpi_monthly_by_payment_type",
+  "text": "kpi_monthly_by_payment_type: One row per month and payment type. Columns: month_start, main_payment_type, orders, revenue, avg_installments, orders_share_pct."
+ },
+ {
+  "kind": "table",
+  "title": "cohort_retention",
+  "text": "cohort_retention: Columns: cohort_month (month of first purchase), months_since_first (0 = first month), active_customers, cohort_size, retention_pct."
+ },
+ {
+  "kind": "table",
+  "title": "repeat_customer_summary",
+  "text": "repeat_customer_summary: A single row. Columns: customers, repeat_customers, repeat_customer_pct."
+ },
+ {
+  "kind": "table",
+  "title": "anomalies",
+  "text": "anomalies: One row per unusual day and KPI. Columns: anomaly_date, kpi, value, expected, deviation_pct, z_score, direction, flag_zscore, flag_iqr, flag_isolation_forest, methods_agreeing, severity."
+ },
+ {
+  "kind": "table",
+  "title": "anomaly_drivers",
+  "text": "anomaly_drivers: Top 5 drivers per anomaly and dimension. Columns: anomaly_date, kpi, dimension, segment, actual, baseline, change, contribution_pct, driver_rank."
+ },
+ {
+  "kind": "table",
+  "title": "review_themes",
+  "text": "review_themes: Sample of LLM-labelled reviews. Columns: order_id, order_date, review_score, theme, sentiment, english_summary, is_late, delivery_days, customer_state."
+ },
+ {
+  "kind": "table",
+  "title": "order_funnel_monthly",
+  "text": "order_funnel_monthly: One row per month: how many orders reached each stage of the journey. Columns: month_start, placed, approved, shipped, delivered, delivered_on_time, on_time_and_happy (on time and rated 4 or 5 stars). Each stage is a subset of the one before it. Use it for funnel or drop-off questions."
+ },
+ {
+  "kind": "table",
+  "title": "customer_summary",
+  "text": "customer_summary: One row per real customer (customer_unique_id), delivered orders in the analysis window only. Columns: customer_unique_id, first_order_date, first_order_month, second_order_date (NULL if they never bought again), delivered_orders, revenue, first_state, first_category (main category of the first order). A repeat customer has delivered_orders >= 2."
+ },
+ {
+  "kind": "table",
+  "title": "customer_monthly",
+  "text": "customer_monthly: One row per month: active_customers, new_customers (first delivered order in that month), returning_customers, revenue_new, revenue_returning. Use it for new versus returning customer questions."
+ },
+ {
+  "kind": "table",
+  "title": "repeat_by_first_category",
+  "text": "repeat_by_first_category: One row per first-purchase category with at least 500 customers. Columns: first_category, customers, repeat_customers, repeat_rate_pct, revenue_per_customer."
+ },
+ {
+  "kind": "example",
+  "title": "What was the total revenue in 2017?",
+  "text": "What was the total revenue in 2017?",
+  "sql": "SELECT SUM(order_revenue) AS revenue FROM fact_orders WHERE is_delivered AND in_analysis_window AND order_date >= '2017-01-01' AND order_date < '2018-01-01'"
+ },
+ {
+  "kind": "example",
+  "title": "Show the number of orders for each month of 2018.",
+  "text": "Show the number of orders for each month of 2018.",
+  "sql": "SELECT year_month, orders FROM kpi_monthly WHERE year_month LIKE '2018-%' ORDER BY year_month"
+ },
+ {
+  "kind": "example",
+  "title": "Which 5 states placed the most orders?",
+  "text": "Which 5 states placed the most orders?",
+  "sql": "SELECT c.customer_state, COUNT(*) AS orders FROM fact_orders AS f JOIN dim_customer AS c ON c.customer_id = f.customer_id WHERE f.in_analysis_window GROUP BY c.customer_state ORDER BY orders DESC LIMIT 5"
+ },
+ {
+  "kind": "example",
+  "title": "What is the average order value for each month?",
+  "text": "What is the average order value for each month?",
+  "sql": "SELECT year_month, aov FROM kpi_monthly ORDER BY year_month"
+ },
+ {
+  "kind": "example",
+  "title": "Which 5 states have the highest late delivery rate, among states with at least 500 delivered orders?",
+  "text": "Which 5 states have the highest late delivery rate, among states with at least 500 delivered orders?",
+  "sql": "SELECT c.customer_state, ROUND(100.0 * COUNT(*) FILTER (WHERE f.is_late) / COUNT(f.is_late), 2) AS late_delivery_rate FROM fact_orders AS f JOIN dim_customer AS c ON c.customer_id = f.customer_id WHERE f.in_analysis_window AND f.is_delivered GROUP BY c.customer_state HAVING COUNT(*) >= 500 ORDER BY late_delivery_rate DESC LIMIT 5"
+ },
+ {
+  "kind": "example",
+  "title": "How much revenue came from each payment type?",
+  "text": "How much revenue came from each payment type?",
+  "sql": "SELECT main_payment_type, SUM(order_revenue) AS revenue FROM fact_orders WHERE is_delivered AND in_analysis_window GROUP BY main_payment_type ORDER BY revenue DESC"
+ },
+ {
+  "kind": "example",
+  "title": "Show month-over-month revenue growth for 2017.",
+  "text": "Show month-over-month revenue growth for 2017.",
+  "sql": "SELECT year_month, revenue, revenue_mom_growth_pct FROM kpi_monthly WHERE year_month LIKE '2017-%' ORDER BY year_month"
+ },
+ {
+  "kind": "example",
+  "title": "What are the top 3 categories by revenue in each quarter of 2018?",
+  "text": "What are the top 3 categories by revenue in each quarter of 2018?",
+  "sql": "WITH quarterly AS (SELECT d.quarter, p.category, SUM(i.item_total) AS revenue FROM fact_order_items AS i JOIN dim_product AS p ON p.product_id = i.product_id JOIN dim_date AS d ON d.date_key = i.order_date WHERE i.is_delivered AND i.in_analysis_window AND d.year = 2018 GROUP BY d.quarter, p.category), ranked AS (SELECT quarter, category, revenue, RANK() OVER (PARTITION BY quarter ORDER BY revenue DESC) AS revenue_rank FROM quarterly) SELECT quarter, category, revenue, revenue_rank FROM ranked WHERE revenue_rank <= 3 ORDER BY quarter, revenue_rank"
+ },
+ {
+  "kind": "example",
+  "title": "Do late orders get lower review scores than on-time orders?",
+  "text": "Do late orders get lower review scores than on-time orders?",
+  "sql": "SELECT is_late, ROUND(AVG(review_score), 2) AS avg_review_score, COUNT(*) AS orders FROM fact_orders WHERE in_analysis_window AND is_delivered AND is_late IS NOT NULL AND review_score IS NOT NULL GROUP BY is_late"
+ },
+ {
+  "kind": "example",
+  "title": "How many anomalies were found for each KPI?",
+  "text": "How many anomalies were found for each KPI?",
+  "sql": "SELECT kpi, COUNT(*) AS anomalies FROM anomalies GROUP BY kpi ORDER BY anomalies DESC"
+ },
+ {
+  "kind": "example",
+  "title": "Which categories drove the revenue anomaly on 2017-11-20?",
+  "text": "Which categories drove the revenue anomaly on 2017-11-20?",
+  "sql": "SELECT segment AS category, actual, baseline, change, contribution_pct FROM anomaly_drivers WHERE anomaly_date = '2017-11-20' AND kpi = 'revenue' AND dimension = 'category' ORDER BY driver_rank"
+ },
+ {
+  "kind": "example",
+  "title": "What do customers complain about most in the labelled reviews?",
+  "text": "What do customers complain about most in the labelled reviews?",
+  "sql": "SELECT theme, COUNT(*) AS reviews FROM review_themes WHERE theme <> 'positive' GROUP BY theme ORDER BY reviews DESC"
+ },
+ {
+  "kind": "example",
+  "title": "Who are the top 5 sellers by revenue?",
+  "text": "Who are the top 5 sellers by revenue?",
+  "sql": "SELECT i.seller_id, s.seller_state, SUM(i.item_total) AS revenue FROM fact_order_items AS i JOIN dim_seller AS s ON s.seller_id = i.seller_id WHERE i.is_delivered AND i.in_analysis_window GROUP BY i.seller_id, s.seller_state ORDER BY revenue DESC LIMIT 5"
+ },
+ {
+  "kind": "example",
+  "title": "How many orders are placed on each day of the week?",
+  "text": "How many orders are placed on each day of the week?",
+  "sql": "SELECT d.day_name, COUNT(*) AS orders FROM fact_orders AS f JOIN dim_date AS d ON d.date_key = f.order_date WHERE f.in_analysis_window GROUP BY d.day_of_week, d.day_name ORDER BY d.day_of_week"
+ },
+ {
+  "kind": "example",
+  "title": "What percentage of customers bought more than once?",
+  "text": "What percentage of customers bought more than once?",
+  "sql": "SELECT repeat_customer_pct FROM repeat_customer_summary"
+ },
+ {
+  "kind": "example",
+  "title": "Show daily revenue and its 7-day average for the first week of March 2018.",
+  "text": "Show daily revenue and its 7-day average for the first week of March 2018.",
+  "sql": "SELECT date_key, revenue, revenue_7d_avg FROM kpi_daily WHERE date_key BETWEEN '2018-03-01' AND '2018-03-07' ORDER BY date_key"
+ }
+]
