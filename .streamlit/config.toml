@@ -1,8 +1,8 @@
-# Look of the website: a light "report canvas" with white tiles.
+# Look of the website: a light canvas with white tiles and a dark green sidebar.
 [theme]
 base = "light"
-primaryColor = "#1d4ed8"
-backgroundColor = "#f1f3f6"
+primaryColor = "#0d9488"
+backgroundColor = "#f2f7f6"
 secondaryBackgroundColor = "#ffffff"
-textColor = "#111827"
+textColor = "#0f172a"
 font = "sans serif"

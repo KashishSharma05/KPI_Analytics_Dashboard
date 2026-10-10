@@ -4,9 +4,9 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import BLUE, GREY, KPI_LABELS, ORANGE, RED, add_kpis, load, money, month_filter, percent_change, total_kpis
+from common import AMBER, GREY, KPI_LABELS, PRIMARY, ROSE, add_kpis, load, money, month_filter, percent_change, report_header, total_kpis
 
-st.title("Business overview")
+report_header("Trends & Anomalies", "Daily KPIs with the unusual days marked")
 st.caption("Olist e-commerce marketplace, Brazil. Orders are counted on the day they were placed.")
 
 start, end = month_filter()
@@ -54,8 +54,8 @@ anomalies = anomalies[(anomalies["kpi"] == kpi) & anomalies["anomaly_date"].betw
 
 figure = go.Figure()
 figure.add_scatter(x=trend.index, y=trend[kpi], name="Daily", mode="lines", line=dict(color=GREY, width=1))
-figure.add_scatter(x=smooth.index, y=smooth, name="7-day average", mode="lines", line=dict(color=BLUE, width=2.5))
-for severity, colour in (("medium", ORANGE), ("high", RED)):
+figure.add_scatter(x=smooth.index, y=smooth, name="7-day average", mode="lines", line=dict(color=PRIMARY, width=2.5))
+for severity, colour in (("medium", AMBER), ("high", ROSE)):
     points = anomalies[anomalies["severity"] == severity]
     figure.add_scatter(
         x=points["anomaly_date"], y=points["value"], name=f"Anomaly ({severity})", mode="markers",
@@ -87,9 +87,9 @@ monthly_view.index = monthly_view.index.to_timestamp()
 monthly_view["growth"] = monthly_view["revenue"].pct_change() * 100
 
 figure = go.Figure()
-figure.add_bar(x=monthly_view.index, y=monthly_view["revenue"], name="Revenue", marker_color=BLUE)
+figure.add_bar(x=monthly_view.index, y=monthly_view["revenue"], name="Revenue", marker_color=PRIMARY)
 figure.add_scatter(x=monthly_view.index, y=monthly_view["growth"], name="Month-over-month growth %",
-                   mode="lines+markers", line=dict(color=ORANGE, width=2), yaxis="y2")
+                   mode="lines+markers", line=dict(color=AMBER, width=2), yaxis="y2")
 figure.update_layout(
     height=380, margin=dict(l=10, r=10, t=30, b=10), legend=dict(orientation="h", y=1.12),
     yaxis=dict(title="Revenue (R$)"),

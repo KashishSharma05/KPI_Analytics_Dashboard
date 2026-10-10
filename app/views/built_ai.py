@@ -6,9 +6,9 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import BLUE, GREY, PROJECT_DIR, load_json, result_table
+from common import GREY, PRIMARY, PROJECT_DIR, load_json, report_header, result_table
 
-st.title("AI assistant: ask the data in plain English")
+report_header("How the AI Assistant Works", "Question to SQL to answer: the steps, the safety checks and the measured accuracy")
 st.markdown(
     "The assistant turns a business question into a SQL query, runs it safely and explains the result. "
     "**The LLM never calculates a number**: every figure comes from the database."
@@ -18,7 +18,7 @@ st.graphviz_chart(
     """
     digraph {
         rankdir=LR; bgcolor="transparent";
-        node [shape=box, style="rounded,filled", fillcolor="#1e293b", fontcolor="white", color="#475569", fontname="Helvetica", fontsize=11];
+        node [shape=box, style="rounded,filled", fillcolor="#134e4a", fontcolor="white", color="#0f766e", fontname="Helvetica", fontsize=11];
         edge [color="#94a3b8"];
         q  [label="Question\\nin English"];
         r  [label="Retrieve (RAG)\\nKPI rules + example queries\\nfrom a FAISS index"];
@@ -73,7 +73,7 @@ with left:
     )
 with right:
     figure = go.Figure()
-    figure.add_bar(x=levels, y=summary["with_rag"], name="With RAG", marker_color=BLUE, text=summary["with_rag"].map("{:.0f}%".format))
+    figure.add_bar(x=levels, y=summary["with_rag"], name="With RAG", marker_color=PRIMARY, text=summary["with_rag"].map("{:.0f}%".format))
     figure.add_bar(x=levels, y=summary["without_rag"], name="Without RAG", marker_color=GREY, text=summary["without_rag"].map("{:.0f}%".format))
     figure.update_layout(height=300, margin=dict(l=10, r=10, t=30, b=10), barmode="group",
                          yaxis=dict(title="Correct answers (%)", range=[0, 110]), legend=dict(orientation="h", y=1.15))

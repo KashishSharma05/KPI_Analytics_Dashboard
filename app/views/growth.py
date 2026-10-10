@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import BLUE, GREY, ORANGE, TEAL, chart_layout, load, money, month_filter, report_header
+from common import AMBER, GREY, PRIMARY, SKY, chart_layout, load, money, month_filter, report_header
 
 start, end = month_filter()
 
@@ -36,8 +36,8 @@ left, right = st.columns([3, 2])
 with left.container(border=True):
     st.markdown('<div class="tile-title">Customers by month: new and returning</div>', unsafe_allow_html=True)
     figure = go.Figure()
-    figure.add_bar(x=monthly["month_start"], y=monthly["new_customers"], name="New customers", marker_color=BLUE)
-    figure.add_bar(x=monthly["month_start"], y=monthly["returning_customers"], name="Returning customers", marker_color=ORANGE)
+    figure.add_bar(x=monthly["month_start"], y=monthly["new_customers"], name="New customers", marker_color=PRIMARY)
+    figure.add_bar(x=monthly["month_start"], y=monthly["returning_customers"], name="Returning customers", marker_color=AMBER)
     figure.update_layout(barmode="stack")
     st.plotly_chart(chart_layout(figure, 320), width="stretch")
     st.caption("Growth is almost entirely acquisition: the orange band of returning customers is barely visible.")
@@ -46,7 +46,7 @@ with right.container(border=True):
     st.markdown('<div class="tile-title">Share of monthly revenue from returning customers (%)</div>', unsafe_allow_html=True)
     share = 100 * monthly["revenue_returning"] / (monthly["revenue_new"] + monthly["revenue_returning"])
     figure = go.Figure()
-    figure.add_scatter(x=monthly["month_start"], y=share, mode="lines+markers", line=dict(color=ORANGE, width=2.5),
+    figure.add_scatter(x=monthly["month_start"], y=share, mode="lines+markers", line=dict(color=AMBER, width=2.5),
                        fill="tozeroy", name="Returning share")
     figure.update_layout(showlegend=False)
     st.plotly_chart(chart_layout(figure, 320), width="stretch")
@@ -61,7 +61,7 @@ with left.container(border=True):
     shown = pd.concat([categories.head(5), categories.tail(8)]).drop_duplicates()
     average = 100 * repeat_customers / customers
     figure = px.bar(shown, x="repeat_rate_pct", y="first_category", orientation="h",
-                    text=shown["repeat_rate_pct"].map("{:.1f}%".format), color_discrete_sequence=[TEAL],
+                    text=shown["repeat_rate_pct"].map("{:.1f}%".format), color_discrete_sequence=[SKY],
                     labels={"repeat_rate_pct": "", "first_category": ""}, hover_data=["customers", "repeat_customers"])
     figure.add_vline(x=average, line_dash="dash", line_color=GREY, annotation_text=f"average {average:.1f}%")
     st.plotly_chart(chart_layout(figure, 400), width="stretch")
@@ -72,7 +72,7 @@ with right.container(border=True):
     st.markdown('<div class="tile-title">How soon does the second order come?</div>', unsafe_allow_html=True)
     gaps = load("second_order_gap")
     gaps["label"] = gaps["gap"].str[3:]
-    figure = px.bar(gaps, x="label", y="customers", text="customers", color_discrete_sequence=[BLUE],
+    figure = px.bar(gaps, x="label", y="customers", text="customers", color_discrete_sequence=[PRIMARY],
                     labels={"label": "", "customers": "Repeat customers"})
     st.plotly_chart(chart_layout(figure, 400), width="stretch")
     same_day = gaps.loc[gaps["label"] == "Same day", "customers"].sum()

@@ -3,9 +3,9 @@
 import plotly.express as px
 import streamlit as st
 
-from common import BLUE, add_kpis, load, money, month_filter, state_filter
+from common import PRIMARY, add_kpis, load, money, month_filter, report_header, state_filter
 
-st.title("Sales drill-down")
+report_header("Sales Drill-Down", "Revenue by category, customer state and payment type")
 
 start, end = month_filter()
 states = state_filter()
@@ -38,7 +38,7 @@ top = categories.head(top_n)
 
 left, right = st.columns(2)
 figure = px.bar(top.iloc[::-1], x="revenue", y="category", orientation="h", text=top.iloc[::-1]["share"].map("{:.1f}%".format),
-                color_discrete_sequence=[BLUE], labels={"revenue": "Revenue (R$)", "category": ""})
+                color_discrete_sequence=[PRIMARY], labels={"revenue": "Revenue (R$)", "category": ""})
 figure.update_layout(height=max(320, 30 * top_n), margin=dict(l=10, r=10, t=30, b=10), title="Revenue and share of total")
 left.plotly_chart(figure, width="stretch")
 
@@ -58,7 +58,7 @@ state_kpis = add_kpis(by_state.groupby("customer_state").sum(numeric_only=True))
 state_kpis["share"] = 100 * state_kpis["revenue"] / state_kpis["revenue"].sum()
 
 left, right = st.columns(2)
-figure = px.bar(state_kpis.head(12).reset_index(), x="customer_state", y="revenue", color_discrete_sequence=[BLUE],
+figure = px.bar(state_kpis.head(12).reset_index(), x="customer_state", y="revenue", color_discrete_sequence=[PRIMARY],
                 labels={"revenue": "Revenue (R$)", "customer_state": ""})
 figure.update_layout(height=340, margin=dict(l=10, r=10, t=30, b=10), title="Revenue by state (top 12)")
 left.plotly_chart(figure, width="stretch")

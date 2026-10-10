@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import (BLUE, GREY, ORANGE, PALETTE, RED, TEAL, add_kpis, chart_layout, load, money, month_filter,
+from common import (AMBER, GREY, PALETTE, PRIMARY, ROSE, SKY, add_kpis, chart_layout, load, money, month_filter,
                     percent_change, report_header, state_filter, total_kpis)
 
 # ----------------------------------------------------------------------- slicers
@@ -63,9 +63,9 @@ left, right = st.columns([2, 1])
 with left.container(border=True):
     st.markdown('<div class="tile-title">Revenue and orders by month</div>', unsafe_allow_html=True)
     figure = go.Figure()
-    figure.add_bar(x=monthly.index, y=monthly["revenue"], name="Revenue (R$)", marker_color=BLUE)
+    figure.add_bar(x=monthly.index, y=monthly["revenue"], name="Revenue (R$)", marker_color=PRIMARY)
     figure.add_scatter(x=monthly.index, y=monthly["orders"], name="Orders", mode="lines+markers",
-                       line=dict(color=ORANGE, width=2.5), yaxis="y2")
+                       line=dict(color=AMBER, width=2.5), yaxis="y2")
     figure.update_layout(yaxis2=dict(overlaying="y", side="right", showgrid=False))
     st.plotly_chart(chart_layout(figure, 300), width="stretch")
 
@@ -85,7 +85,7 @@ with left.container(border=True):
     st.markdown('<div class="tile-title">Top categories by revenue</div>', unsafe_allow_html=True)
     categories = by_category.groupby("category", as_index=False)["revenue"].sum().nlargest(8, "revenue")
     figure = px.bar(categories.iloc[::-1], x="revenue", y="category", orientation="h",
-                    text=categories.iloc[::-1]["revenue"].map(money), color_discrete_sequence=[TEAL],
+                    text=categories.iloc[::-1]["revenue"].map(money), color_discrete_sequence=[SKY],
                     labels={"revenue": "", "category": ""})
     figure.update_traces(textposition="inside", insidetextanchor="end")
     figure.update_xaxes(showticklabels=False)
@@ -109,9 +109,9 @@ with middle.container(border=True):
 with right.container(border=True):
     st.markdown('<div class="tile-title">Late deliveries and review score</div>', unsafe_allow_html=True)
     figure = go.Figure()
-    figure.add_bar(x=monthly.index, y=monthly["late_delivery_rate"], name="Late delivery %", marker_color=RED, opacity=0.75)
+    figure.add_bar(x=monthly.index, y=monthly["late_delivery_rate"], name="Late delivery %", marker_color=ROSE, opacity=0.75)
     figure.add_scatter(x=monthly.index, y=monthly["avg_review_score"], name="Review score", mode="lines+markers",
-                       line=dict(color=BLUE, width=2.5), yaxis="y2")
+                       line=dict(color=PRIMARY, width=2.5), yaxis="y2")
     figure.update_layout(yaxis2=dict(overlaying="y", side="right", showgrid=False, range=[3, 5]))
     st.plotly_chart(chart_layout(figure, 320), width="stretch")
 
@@ -140,8 +140,8 @@ with right.container(border=True):
     anomalies = anomalies[anomalies["anomaly_date"].between(start, end)]
     counts = anomalies.groupby(["kpi", "severity"]).size().unstack(fill_value=0).reindex(columns=["high", "medium"], fill_value=0)
     figure = go.Figure()
-    figure.add_bar(y=counts.index, x=counts["high"], name="High", orientation="h", marker_color=RED)
-    figure.add_bar(y=counts.index, x=counts["medium"], name="Medium", orientation="h", marker_color=ORANGE)
+    figure.add_bar(y=counts.index, x=counts["high"], name="High", orientation="h", marker_color=ROSE)
+    figure.add_bar(y=counts.index, x=counts["medium"], name="Medium", orientation="h", marker_color=AMBER)
     figure.update_layout(barmode="stack")
     st.plotly_chart(chart_layout(figure, 250), width="stretch")
     st.caption(f"{len(anomalies)} unusual days, detected for all states together.")

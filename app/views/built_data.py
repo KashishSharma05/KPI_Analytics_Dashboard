@@ -3,9 +3,9 @@
 import pandas as pd
 import streamlit as st
 
-from common import load_json, result_table
+from common import load_json, report_header, result_table
 
-st.title("Data model and SQL")
+report_header("Data Model & SQL", "Three layers in PostgreSQL, a star schema and the queries behind the KPIs")
 st.markdown(
     "The data moves through three layers in PostgreSQL. Each layer has one job, "
     "so a problem can be traced to the step that caused it."
@@ -41,14 +41,14 @@ with left:
         """
         digraph {
             bgcolor="transparent"; rankdir=LR;
-            node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, fontcolor="white", color="#475569"];
+            node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, fontcolor="white", color="#0f766e"];
             edge [color="#94a3b8", arrowhead=none];
-            fact_orders      [label="fact_orders\\none row per order\\nrevenue, delivery days, is_late, review score", fillcolor="#2563eb"];
-            fact_order_items [label="fact_order_items\\none row per item\\nprice, freight, item total", fillcolor="#2563eb"];
-            dim_date     [label="dim_date\\nday, week, month, weekday", fillcolor="#1e293b"];
-            dim_customer [label="dim_customer\\nunique customer, city, state", fillcolor="#1e293b"];
-            dim_product  [label="dim_product\\ncategory", fillcolor="#1e293b"];
-            dim_seller   [label="dim_seller\\ncity, state", fillcolor="#1e293b"];
+            fact_orders      [label="fact_orders\\none row per order\\nrevenue, delivery days, is_late, review score", fillcolor="#0d9488"];
+            fact_order_items [label="fact_order_items\\none row per item\\nprice, freight, item total", fillcolor="#0d9488"];
+            dim_date     [label="dim_date\\nday, week, month, weekday", fillcolor="#134e4a"];
+            dim_customer [label="dim_customer\\nunique customer, city, state", fillcolor="#134e4a"];
+            dim_product  [label="dim_product\\ncategory", fillcolor="#134e4a"];
+            dim_seller   [label="dim_seller\\ncity, state", fillcolor="#134e4a"];
             dim_date -> fact_orders; dim_customer -> fact_orders;
             fact_orders -> fact_order_items;
             fact_order_items -> dim_product; fact_order_items -> dim_seller;

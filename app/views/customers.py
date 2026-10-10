@@ -4,9 +4,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import BLUE, ORANGE, RED, add_kpis, load, month_filter, state_filter, total_kpis
+from common import AMBER, PRIMARY, ROSE, add_kpis, load, month_filter, report_header, state_filter, total_kpis
 
-st.title("Delivery and customer voice")
+report_header("Delivery & Customer Voice", "How late delivery moves review scores, and what customers complain about")
 
 start, end = month_filter()
 states = state_filter()
@@ -26,9 +26,9 @@ c3.metric("Average review score", f"{totals['avg_review_score']:.2f} / 5")
 st.subheader("Late deliveries and review scores move together")
 monthly = add_kpis(by_state.groupby("month_start").sum(numeric_only=True))
 figure = go.Figure()
-figure.add_bar(x=monthly.index, y=monthly["late_delivery_rate"], name="Late delivery rate (%)", marker_color=ORANGE)
+figure.add_bar(x=monthly.index, y=monthly["late_delivery_rate"], name="Late delivery rate (%)", marker_color=AMBER)
 figure.add_scatter(x=monthly.index, y=monthly["avg_review_score"], name="Average review score", mode="lines+markers",
-                   line=dict(color=BLUE, width=2.5), yaxis="y2")
+                   line=dict(color=PRIMARY, width=2.5), yaxis="y2")
 figure.update_layout(
     height=380, margin=dict(l=10, r=10, t=30, b=10), legend=dict(orientation="h", y=1.12),
     yaxis=dict(title="Late delivery rate (%)"),
@@ -66,7 +66,7 @@ else:
     themes = low["theme"].value_counts().rename_axis("theme").reset_index(name="reviews")
     themes["share"] = 100 * themes["reviews"] / themes["reviews"].sum()
     figure = px.bar(themes.iloc[::-1], x="reviews", y="theme", orientation="h", text=themes.iloc[::-1]["share"].map("{:.0f}%".format),
-                    color_discrete_sequence=[RED], labels={"reviews": "Reviews with 1-2 stars", "theme": ""})
+                    color_discrete_sequence=[ROSE], labels={"reviews": "Reviews with 1-2 stars", "theme": ""})
     figure.update_layout(height=340, margin=dict(l=10, r=10, t=30, b=10))
     left.plotly_chart(figure, width="stretch")
 

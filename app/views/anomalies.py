@@ -5,9 +5,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import BLUE, GREY, KPI_LABELS, ORANGE, RED, add_kpis, load
+from common import AMBER, GREY, KPI_LABELS, PRIMARY, ROSE, add_kpis, load, report_header
 
-st.title("Anomalies and root cause")
+report_header("Anomalies & Root Cause", "Unusual days, and which categories, states and payment types caused them")
 st.caption(
     "Each day is compared with the 28 days before it. A day is flagged by a rolling z-score (|z| > 3), "
     "an IQR rule, or an Isolation Forest. Severity is high when at least two methods agree or |z| > 4."
@@ -61,9 +61,9 @@ c4.metric("Flagged by", ", ".join(methods))
 daily = add_kpis(load("daily")).set_index("date_key")
 window = daily.loc[chosen["anomaly_date"] - pd.Timedelta(days=35): chosen["anomaly_date"] + pd.Timedelta(days=14)]
 figure = go.Figure()
-figure.add_scatter(x=window.index, y=window[chosen["kpi"]], mode="lines+markers", line=dict(color=BLUE), name="Daily")
+figure.add_scatter(x=window.index, y=window[chosen["kpi"]], mode="lines+markers", line=dict(color=PRIMARY), name="Daily")
 figure.add_scatter(x=[chosen["anomaly_date"]], y=[chosen["value"]], mode="markers", name="Anomaly",
-                   marker=dict(color=RED if chosen["severity"] == "high" else ORANGE, size=14))
+                   marker=dict(color=ROSE if chosen["severity"] == "high" else AMBER, size=14))
 figure.add_hline(y=chosen["expected"], line_dash="dash", line_color=GREY, annotation_text="expected")
 figure.update_layout(height=320, margin=dict(l=10, r=10, t=30, b=10), yaxis_title=KPI_LABELS[chosen["kpi"]],
                      legend=dict(orientation="h", y=1.15))
@@ -87,7 +87,7 @@ else:
     for column, (dimension, title) in zip(st.columns(3), titles.items()):
         part = drivers[drivers["dimension"] == dimension].sort_values("change", key=abs)
         figure = px.bar(part, x="change", y="segment", orientation="h", text=part["contribution_pct"].map("{:.0f}%".format),
-                        color_discrete_sequence=[BLUE], labels={"change": "Change vs baseline", "segment": ""})
+                        color_discrete_sequence=[PRIMARY], labels={"change": "Change vs baseline", "segment": ""})
         figure.update_layout(height=300, margin=dict(l=10, r=10, t=40, b=10), title=title)
         column.plotly_chart(figure, width="stretch")
 

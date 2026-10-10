@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import BLUE, chart_layout, load, money, report_header
+from common import PRIMARY, chart_layout, load, money, report_header
 
 report_header("Business Case", "From the numbers to what the business should do next", "Olist marketplace, Jan 2017 to Aug 2018")
 
@@ -48,7 +48,7 @@ counts = funnel[["placed", "approved", "shipped", "delivered", "delivered_on_tim
 
 left, right = st.columns([3, 2])
 with left.container(border=True):
-    figure = go.Figure(go.Funnel(y=stages, x=counts, textinfo="value+percent initial", marker=dict(color=BLUE)))
+    figure = go.Figure(go.Funnel(y=stages, x=counts, textinfo="value+percent initial", marker=dict(color=PRIMARY)))
     st.plotly_chart(chart_layout(figure, 360), width="stretch")
 with right:
     lost_delivery = counts[0] - counts[3]
