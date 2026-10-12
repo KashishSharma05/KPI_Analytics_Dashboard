@@ -24,7 +24,7 @@ import time
 
 from sqlalchemy import text
 
-from src import detect_anomalies, export, load, report, showcase
+from src import detect_anomalies, excel_report, export, load, report, showcase
 from src.ai import hosted
 from src.ai import review_themes
 from src.db import get_engine, run_sql_file
@@ -76,6 +76,7 @@ def main():
     step("10. Website data")
     showcase.main()
     hosted.build()  # DuckDB copy of the mart schema, used by the chat on the hosted site
+    excel_report.main()  # the MIS report as an Excel workbook
 
     step("11. Weekly report")
     report.main()

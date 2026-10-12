@@ -4,12 +4,14 @@ Slicers at the top filter every tile. KPI tiles show the selected period and
 the change in its last month; the visuals below break the numbers down.
 """
 
+import os
+
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import (AMBER, GREY, PALETTE, PRIMARY, ROSE, SKY, add_kpis, chart_layout, load, money, month_filter,
-                    percent_change, report_header, state_filter, total_kpis)
+from common import (AMBER, GREY, PALETTE, PRIMARY, PROJECT_DIR, ROSE, SKY, add_kpis, chart_layout, load, money,
+                    month_filter, percent_change, report_header, state_filter, total_kpis)
 
 # ----------------------------------------------------------------------- slicers
 slicer_left, slicer_right = st.columns([3, 2])
@@ -35,6 +37,13 @@ report_header(
 if by_state.empty:
     st.info("No orders in this selection.")
     st.stop()
+
+# The same report as an Excel workbook, for people who work in spreadsheets.
+excel_file = os.path.join(PROJECT_DIR, "excel", "KPI_MIS_Report.xlsx")
+if os.path.exists(excel_file):
+    with open(excel_file, "rb") as workbook:
+        st.download_button("⬇ Download this report as an Excel workbook (formulas included)", workbook.read(),
+                           file_name="KPI_MIS_Report.xlsx")
 
 # --------------------------------------------------------------------- KPI tiles
 monthly = add_kpis(by_state.groupby("month_start").sum(numeric_only=True))

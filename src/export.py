@@ -167,6 +167,31 @@ APP_EXPORTS = {
 }
 
 
+# Flat files for Tableau: one row per order and one row per item, with the
+# customer, product and seller columns already joined on.
+BI_EXPORTS = {
+    "tableau_orders": """
+        SELECT
+            f.order_id, f.order_date, f.order_status, f.is_delivered, f.is_canceled,
+            f.item_count, f.order_revenue, f.main_payment_type, f.payment_installments,
+            f.delivery_days, f.is_late, f.review_score,
+            c.customer_unique_id, c.customer_city, c.customer_state
+        FROM mart.fact_orders AS f
+        JOIN mart.dim_customer AS c ON c.customer_id = f.customer_id
+        WHERE f.in_analysis_window""",
+    "tableau_order_items": """
+        SELECT
+            i.order_id, i.order_item_id, i.order_date, i.is_delivered,
+            i.price, i.freight_value, i.item_total,
+            p.category, s.seller_state, c.customer_state
+        FROM mart.fact_order_items AS i
+        JOIN mart.dim_product  AS p ON p.product_id  = i.product_id
+        JOIN mart.dim_seller   AS s ON s.seller_id   = i.seller_id
+        JOIN mart.dim_customer AS c ON c.customer_id = i.customer_id
+        WHERE i.in_analysis_window""",
+}
+
+
 def table_exists(connection, name):
     return connection.execute(text("SELECT to_regclass(:name)"), {"name": f"mart.{name}"}).scalar() is not None
 
@@ -194,6 +219,12 @@ def main():
             for name in existing:
                 path = f"{EXPORT_DIR}/{name}.csv"
                 rows = copy_query_to_csv(cursor, f"SELECT * FROM mart.{name}", path)
+                print(f"  {name:30s} {rows:>8,} rows  ->  {path}")
+
+            print("\nFlat files for Tableau:")
+            for name, query in BI_EXPORTS.items():
+                path = f"{EXPORT_DIR}/{name}.csv"
+                rows = copy_query_to_csv(cursor, query, path)
                 print(f"  {name:30s} {rows:>8,} rows  ->  {path}")
 
             print("\nSummary tables for the dashboard:")

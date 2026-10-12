@@ -95,6 +95,8 @@ One Streamlit app (`app/dashboard.py`) presents the whole project.
 
 The dashboard pages share a period filter and a state filter. Their data files hold counts and sums rather than ready-made averages, so every KPI is recalculated exactly for whatever is selected; the totals match the SQL views.
 
+The executive report is also available as an Excel workbook (`excel/KPI_MIS_Report.xlsx`, written by `src/excel_report.py`): KPIs, a month-by-month table, state ranking and top categories, all calculated with `SUMIFS` formulas over a data sheet, with a state picker that every number and chart follows. It can be downloaded from the Executive report page.
+
 The site reads small files in `app/data/`, so it runs without the database. The "Ask your data" chat page needs a Gemini API key. It runs its queries on PostgreSQL when the database is configured, and otherwise on a read-only DuckDB copy of the same tables (`app/data/mart.duckdb`), which is what the live site uses.
 
 ---
