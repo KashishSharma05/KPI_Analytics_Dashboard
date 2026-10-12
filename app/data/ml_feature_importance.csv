@@ -1,0 +1,20 @@
+feature,importance
+Days promised to the customer,0.0381
+State: late rate in the last 30 days,0.0117
+Customer state,0.0086
+State: deliveries in the last 30 days,0.0074
+Seller: share of past orders that were late,0.0025
+Seller state,0.0016
+Hour of purchase,0.001
+Number of sellers in the order,0.0009
+Number of items,0.0008
+Value of the items,0.0008
+Day of the week,0.0003
+Seller: orders delivered so far,0.0002
+Product category,-0.0002
+Total volume,-0.0005
+Total weight,-0.0005
+Seller and customer in the same state,-0.0008
+Freight as a share of item value,-0.0008
+Freight charge,-0.0023
+Month of purchase,-0.0035

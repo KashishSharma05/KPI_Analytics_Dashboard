@@ -115,6 +115,25 @@ A day is **high severity** when at least two methods agree or |z| > 4. Result: *
 
 ---
 
+## Late-delivery prediction
+
+Late delivery is the clearest driver of bad reviews, so the next question is whether a late order can be spotted when it is placed (`sql/09_ml_features.sql`, `src/ml/train.py`).
+
+- **Features:** 19 columns, all known at the moment of purchase: days promised, route, category, size, and the past late rate of the seller and of the destination state (built only from orders already delivered by then).
+- **Split:** by time. Trained on 68,051 orders placed up to April 2018, tested on 25,352 orders from May to August 2018 (4.4% late).
+- **Measures:** ROC AUC, average precision, and how many late orders are found among the 10% of orders ranked riskiest. Accuracy is not used: a model that always says "on time" would be 96% accurate.
+
+| Model | ROC AUC | Average precision | Late orders found in top 10% | Flagged orders that were late |
+|---|---|---|---|---|
+| Rule of thumb (state's recent late rate) | 0.50 | 0.055 | 18.5% | 8.1% |
+| Logistic regression | 0.68 | 0.085 | 21.4% | 9.4% |
+| Random forest | 0.61 | 0.059 | 13.9% | 6.1% |
+| **Gradient boosting** | 0.67 | 0.087 | **26.7%** | **11.8%** |
+
+The best model finds about 2.7 times as many late orders as a random check of the same size. That is useful for a cheap action, such as an early message to the customer, but it is a modest model: most of what makes an order late (carrier, weather, stock) is not in this data, and the late rate swings between 1% and 19% from month to month. The strongest signal is the number of days promised to the customer.
+
+---
+
 ## AI features
 
 ### Ask-Your-Data assistant

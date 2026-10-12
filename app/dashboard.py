@@ -46,6 +46,7 @@ pages = {
         st.Page("views/growth.py", title="Growth & retention", icon="🌱"),
         st.Page("views/anomalies.py", title="Anomalies & root cause", icon="🚨"),
         st.Page("views/customers.py", title="Delivery & customer voice", icon="🚚"),
+        st.Page("views/prediction.py", title="Late delivery prediction", icon="🔮"),
     ],
     "How it was built": [
         st.Page("views/built_data.py", title="Data model & SQL", icon="🗄️"),

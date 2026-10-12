@@ -1,0 +1,5 @@
+model,roc_auc,average_precision,late_orders_found_pct,flagged_that_were_late_pct
+Rule of thumb: state's recent late rate,0.4972,0.0545,18.5,8.1
+Logistic regression,0.6831,0.0847,21.4,9.4
+Random forest,0.6072,0.0587,13.9,6.1
+Gradient boosting,0.6702,0.0872,26.7,11.8

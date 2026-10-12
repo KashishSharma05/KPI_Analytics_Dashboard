@@ -14,6 +14,7 @@ Steps, in order:
   9. export CSV files (full tables, and summary tables for the website)
  10. build the data behind the website's "How it was built" pages
  11. build the weekly report (and email it if SMTP is set in .env)
+ 12. build the features for the late-delivery model, then train and test it
 
 Two AI jobs are run separately because they call the LLM many times:
   python -m src.ai.review_themes    label the review sample (only needed once)
@@ -26,6 +27,7 @@ from sqlalchemy import text
 
 from src import detect_anomalies, excel_report, export, load, report, showcase
 from src.ai import hosted
+from src.ml import train as late_delivery_model
 from src.ai import review_themes
 from src.db import get_engine, run_sql_file
 
@@ -80,6 +82,10 @@ def main():
 
     step("11. Weekly report")
     report.main()
+
+    step("12. Late-delivery prediction model")
+    run_sql_file("sql/09_ml_features.sql")
+    late_delivery_model.main()
 
     print(f"\nPipeline finished in {time.time() - start:.1f} seconds.")
 
